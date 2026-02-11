@@ -20,8 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
     try {
         if ($_POST['id']) {
-            $sql = "UPDATE carritos SET nombre_responsable=:nombre_responsable,telefono_responsable=:telefono_responsable,
-                    nombre_carrito=:nombre_carrito,descripcion=:descripcion,equipamiento=:equipamiento,
+            $sql = "UPDATE carritos SET nombre_responsable=:nombre_responsable,
+                    nombre_carrito=:nombre_carrito,descripcion=:descripcion,
                     asistencia=:asistencia,hora_salida=:hora_salida,fecha_registro=:fecha_registro,estado=:estado WHERE idcarritos=:id";
             $pdo->prepare($sql)->execute(array_merge($data,[':id'=>(int)$_POST['id']]));
             setFlash('success','Carrito actualizado.');
