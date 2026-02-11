@@ -1,6 +1,6 @@
 <?php
 // config.php
-$conexion = mysqli_connect("localhost", "root", "", "comunidad_de_emprendedores");
+$conexion = mysqli_connect("localhost", "root", "1234567890", "comunidad_de_emprendedores");
 
 
 if (!$conexion) {
