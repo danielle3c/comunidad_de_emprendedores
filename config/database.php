@@ -5,7 +5,7 @@
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', '1234567890');
 define('DB_NAME', 'comunidad_de_emprendedores');
 define('DB_CHARSET', 'utf8mb4');
 
