@@ -25,6 +25,73 @@
     </style>
 </head>
 <body>
+    <div class="card mb-4">
+  <div class="card-body">
+    <div class="position-relative">
+      <input id="smartSearch" type="text" class="form-control"
+             placeholder="Buscar persona por RUT o nombre..."
+             autocomplete="off">
+      <div id="smartResults" class="list-group position-absolute w-100 mt-1 shadow-sm"
+           style="z-index: 9999; display:none; max-height: 320px; overflow:auto;"></div>
+    </div>
+    <div class="text-muted mt-2" style="font-size:.85rem">
+      Selecciona una persona para ver su historial completo.
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const inp = document.getElementById('smartSearch');
+  const box = document.getElementById('smartResults');
+  let t = null;
+
+  function hide(){ box.style.display='none'; box.innerHTML=''; }
+  function show(){ box.style.display='block'; }
+
+  async function search(q){
+    const r = await fetch('personas_search_api.php?q=' + encodeURIComponent(q));
+    if(!r.ok) return [];
+    return await r.json();
+  }
+
+  inp.addEventListener('input', () => {
+    clearTimeout(t);
+    const q = inp.value.trim();
+    if(q.length < 2){ hide(); return; }
+
+    t = setTimeout(async () => {
+      const data = await search(q);
+      if(!Array.isArray(data) || data.length === 0){
+        box.innerHTML = `<div class="list-group-item text-muted">Sin resultados</div>`;
+        show();
+        return;
+      }
+
+      box.innerHTML = data.map(p => `
+        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+           href="persona_detalle.php?id=${p.id}">
+          <div>
+            <div class="fw-semibold">${p.nombre}</div>
+            <div class="text-muted" style="font-size:.85rem">${p.rut ?? '-'}</div>
+          </div>
+          <div class="d-flex gap-1">
+            <span class="badge ${p.contrato_activo ? 'bg-success' : 'bg-secondary'}">Contrato</span>
+            <span class="badge ${p.credito_activo ? 'bg-success' : 'bg-secondary'}">Crédito</span>
+            <span class="badge ${p.talleres ? 'bg-info' : 'bg-secondary'}">Talleres</span>
+          </div>
+        </a>
+      `).join('');
+      show();
+    }, 250);
+  });
+
+  document.addEventListener('click', (e) => {
+    if(!box.contains(e.target) && e.target !== inp) hide();
+  });
+})();
+</script>
+
 <div class="d-flex">
 <!-- SIDEBAR -->
 <div class="sidebar d-flex flex-column">
