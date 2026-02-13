@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Tarjetas de Presentación';
 
 $pdo = getConnection();
@@ -65,6 +65,11 @@ if ($action === 'edit' && $id) {
     }
 }
 
+// --- CREAR: formulario vacío ---
+if ($action === 'create') {
+    $edit = null;
+}
+
 // --- LISTAR ---
 $search  = sanitize($_GET['search'] ?? '');
 $page    = max(1, (int)($_GET['page'] ?? 1));
@@ -89,5 +94,120 @@ $stmt->bindValue(':offset', $pag['offset'], PDO::PARAM_INT);
 $stmt->execute();
 $rows = $stmt->fetchAll();
 
-include 'includes/header.php';
+include __DIR__ . '/includes/header.php';
 ?>
+
+<?php if ($action === 'edit' || $action === 'create'): ?>
+<div class="card card-soft mb-4">
+  <div class="card-header bg-white border-0 fw-semibold">
+    <?= $edit ? 'Editar Tarjeta de Presentación' : 'Nueva Tarjeta de Presentación' ?>
+  </div>
+
+  <div class="card-body">
+    <form method="POST">
+      <input type="hidden" name="id" value="<?= $edit['idtarjeta'] ?? '' ?>">
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="nombre" class="form-control form-control-sm" required
+                 value="<?= htmlspecialchars($edit['nombre'] ?? '') ?>">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Cantidad</label>
+          <input type="number" name="cantidad" class="form-control form-control-sm" required min="1"
+                 value="<?= (int)($edit['cantidad'] ?? 1) ?>">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Valor Monetario</label>
+          <input type="number" step="0.01" name="valor_monetario" class="form-control form-control-sm" required min="0"
+                 value="<?= (float)($edit['valor_monetario'] ?? 0) ?>">
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-save"></i> Guardar
+        </button>
+        <a href="tarjetas_presentacion.php" class="btn btn-secondary btn-sm">Volver</a>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endif; ?>
+
+
+<div class="card card-soft">
+  <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">
+      Listado <span class="badge bg-secondary"><?= $total ?></span>
+    </span>
+
+    <div class="d-flex gap-2">
+      <form class="d-flex gap-2" method="GET">
+        <input type="text" name="search" class="form-control form-control-sm"
+               placeholder="Buscar por nombre..." value="<?= htmlspecialchars($search) ?>">
+        <button class="btn btn-sm btn-outline-secondary">Buscar</button>
+      </form>
+
+      <a href="tarjetas_presentacion.php?action=create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus"></i> Nuevo
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+            <th>Valor</th>
+            <th>Fecha</th>
+            <th style="width:120px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($rows as $r): ?>
+            <tr>
+              <td><?= (int)$r['idtarjeta'] ?></td>
+              <td><?= htmlspecialchars($r['nombre']) ?></td>
+              <td><?= (int)$r['cantidad'] ?></td>
+              <td><?= formatMoney($r['valor_monetario']) ?></td>
+              <td><?= formatDateTime($r['created_at'] ?? null) ?></td>
+              <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   href="tarjetas_presentacion.php?action=edit&id=<?= (int)$r['idtarjeta'] ?>">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a class="btn btn-sm btn-outline-danger"
+                   href="tarjetas_presentacion.php?action=delete&id=<?= (int)$r['idtarjeta'] ?>"
+                   onclick="return confirm('¿Eliminar este registro?');">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+
+          <?php if (!$rows): ?>
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">Sin registros</td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <?php if ($pag['totalPages'] > 1): ?>
+    <div class="card-footer bg-white border-0">
+      <?= renderPagination($pag, 'tarjetas_presentacion.php?search=' . urlencode($search)) ?>
+    </div>
+  <?php endif; ?>
+</div>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>
