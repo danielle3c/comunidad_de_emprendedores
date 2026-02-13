@@ -1,7 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/helpers.php';
 
+if (!function_exists('getConnection')) {
+    die("No se cargó getConnection(). Revisa includes/helpers.php y config/database.php");
+}
+
 $pdo = getConnection();
+
 
 
 $stats = [
