@@ -158,6 +158,11 @@ if (session_status() === PHP_SESSION_NONE) session_start();
       <a href="documentos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='documentos.php')?'active':'' ?>">
         <i class="bi bi-folder"></i> Documentos
       </a>
+      <a href="tarjetas_presentacion.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='tarjetas_presentacion.php')?'active':'' ?>">
+  <i class="bi bi-person-vcard"></i> Tarjetas de Presentación
+</a>
+
+
       <a href="usuarios.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='usuarios.php')?'active':'' ?>">
         <i class="bi bi-people"></i> Usuarios
       </a>
