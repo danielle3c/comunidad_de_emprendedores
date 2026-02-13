@@ -18,6 +18,9 @@ $stats = [
     'cobranzas_mes'  => $pdo->query("SELECT COALESCE(SUM(monto),0) FROM cobranzas WHERE MONTH(fecha_hora)=MONTH(NOW()) AND YEAR(fecha_hora)=YEAR(NOW())")->fetchColumn(),
     'talleres'       => $pdo->query("SELECT COUNT(*) FROM talleres WHERE estado='Programado'")->fetchColumn(),
     'usuarios'       => $pdo->query("SELECT COUNT(*) FROM Usuarios WHERE activo=1")->fetchColumn(),
+    'tarjetas'      => $pdo->query("SELECT COUNT(*) FROM tarjetas_presentacion")->fetchColumn(),
+'tarjetas_monto'=> $pdo->query("SELECT COALESCE(SUM(valor_monetario),0) FROM tarjetas_presentacion")->fetchColumn(),
+
 ];
 
 include 'includes/header.php';
