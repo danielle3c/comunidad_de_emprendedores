@@ -3,88 +3,138 @@ require_once 'includes/helpers.php';
 $pageTitle = 'Tarjetas de Presentación';
 $pdo = getConnection();
 
-/* GUARDAR */
+$action = $_GET['action'] ?? 'list';
+$id     = (int)($_GET['id'] ?? 0);
+
+// --- GUARDAR (CREAR/EDITAR) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $nombre   = sanitize($_POST['nombre'] ?? '');
-    $cantidad = (int)($_POST['cantidad'] ?? 0);
-    $valor    = (float)($_POST['valor'] ?? 0);
+    $data = [
+        'nombre'         => sanitize($_POST['nombre'] ?? ''),
+        'cantidad'       => (int)($_POST['cantidad'] ?? 0),
+        'valor_monetario'=> (float)($_POST['valor_monetario'] ?? 0),
+    ];
 
-    $sql = "INSERT INTO tarjetas_presentacion (nombre, cantidad, valor)
-            VALUES (:nombre, :cantidad, :valor)";
+    try {
+        if (!empty($_POST['id'])) {
+            $sql = "UPDATE tarjetas_presentacion
+                    SET nombre=:nombre, cantidad=:cantidad, valor_monetario=:valor_monetario
+                    WHERE idtarjeta=:id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':nombre' => $data['nombre'],
+                ':cantidad' => $data['cantidad'],
+                ':valor_monetario' => $data['valor_monetario'],
+                ':id' => (int)$_POST['id']
+            ]);
+            setFlash('success', 'Registro actualizado correctamente.');
+        } else {
+            $sql = "INSERT INTO tarjetas_presentacion (nombre, cantidad, valor_monetario)
+                    VALUES (:nombre, :cantidad, :valor_monetario)";
+            $pdo->prepare($sql)->execute($data);
+            setFlash('success', 'Registro creado correctamente.');
+        }
+    } catch (PDOException $e) {
+        setFlash('error', 'Error: ' . $e->getMessage());
+    }
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':nombre' => $nombre,
-        ':cantidad' => $cantidad,
-        ':valor' => $valor
-    ]);
-
-    setFlash('success', 'Tarjeta registrada correctamente.');
     redirect('tarjetas_presentacion.php');
 }
 
-/* LISTAR */
-$tarjetas = $pdo->query("SELECT * FROM tarjetas_presentacion ORDER BY idtarjeta DESC")->fetchAll();
+// --- ELIMINAR ---
+if ($action === 'delete' && $id) {
+    try {
+        $pdo->prepare("DELETE FROM tarjetas_presentacion WHERE idtarjeta=?")->execute([$id]);
+        setFlash('success', 'Registro eliminado.');
+    } catch (PDOException $e) {
+        setFlash('error', 'No se puede eliminar: ' . $e->getMessage());
+    }
+    redirect('tarjetas_presentacion.php');
+}
+
+// --- EDITAR: cargar datos ---
+$edit = null;
+if ($action === 'edit' && $id) {
+    $st = $pdo->prepare("SELECT * FROM tarjetas_presentacion WHERE idtarjeta=?");
+    $st->execute([$id]);
+    $edit = $st->fetch();
+    if (!$edit) {
+        setFlash('error', 'Registro no encontrado.');
+        redirect('tarjetas_presentacion.php');
+    }
+}
+
+// --- LISTAR ---
+$search  = sanitize($_GET['search'] ?? '');
+$page    = max(1, (int)($_GET['page'] ?? 1));
+$perPage = 15;
+
+$where  = $search ? "WHERE nombre LIKE :s" : "";
+$params = $search ? [':s' => "%$search%"] : [];
+
+$total = $pdo->prepare("SELECT COUNT(*) FROM tarjetas_presentacion $where");
+$total->execute($params);
+$total = (int)$total->fetchColumn();
+
+$pag = getPaginationData($total, $page, $perPage);
+
+$stmt = $pdo->prepare("SELECT * FROM tarjetas_presentacion
+                       $where
+                       ORDER BY idtarjeta DESC
+                       LIMIT :limit OFFSET :offset");
+foreach ($params as $k => $v) $stmt->bindValue($k, $v);
+$stmt->bindValue(':limit', $pag['perPage'], PDO::PARAM_INT);
+$stmt->bindValue(':offset', $pag['offset'], PDO::PARAM_INT);
+$stmt->execute();
+
+$rows = $stmt->fetchAll();
 
 include 'includes/header.php';
 ?>
 
-<div class="card card-soft p-4 mb-4">
-  <h5 class="mb-3">Nueva Tarjeta</h5>
-
-  <form method="POST">
-    <div class="row g-3">
-      <div class="col-md-4">
-        <label class="form-label">Nombre</label>
-        <input type="text" name="nombre" class="form-control" required>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Cantidad</label>
-        <input type="number" name="cantidad" class="form-control" required min="1">
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Valor</label>
-        <input type="number" name="valor" step="0.01" class="form-control" required min="0">
-      </div>
+<?php if ($action === 'edit' || $action === 'create'): ?>
+<div class="card mb-4">
+    <div class="card-header bg-white border-0 fw-semibold">
+        <?= $edit ? 'Editar Tarjeta de Presentación' : 'Nueva Tarjeta de Presentación' ?>
     </div>
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="id" value="<?= $edit['idtarjeta'] ?? '' ?>">
 
-    <button type="submit" class="btn btn-primary mt-3">
-      <i class="bi bi-save"></i> Guardar
-    </button>
-  </form>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" name="nombre" class="form-control form-control-sm"
+                           required value="<?= $edit['nombre'] ?? '' ?>">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Cantidad *</label>
+                    <input type="number" name="cantidad" class="form-control form-control-sm"
+                           required min="0" value="<?= $edit['cantidad'] ?? 0 ?>">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Valor Monetario *</label>
+                    <input type="number" step="0.01" name="valor_monetario" class="form-control form-control-sm"
+                           required min="0" value="<?= $edit['valor_monetario'] ?? 0 ?>">
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+                <a href="tarjetas_presentacion.php" class="btn btn-secondary btn-sm">Cancelar</a>
+            </div>
+        </form>
+    </div>
 </div>
+<?php endif; ?>
 
+<div class="card">
+    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">
+            Listado <span class="badge bg-secondary"><?= $total ?></span>
+        </span>
 
-<div class="card card-soft p-4">
-  <h5 class="mb-3">Listado de Tarjetas</h5>
-
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Cantidad</th>
-          <th>Valor</th>
-          <th>Fecha</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($tarjetas as $t): ?>
-          <tr>
-            <td><?= $t['idtarjeta'] ?></td>
-            <td><?= htmlspecialchars($t['nombre']) ?></td>
-            <td><?= $t['cantidad'] ?></td>
-            <td><?= formatMoney($t['valor']) ?></td>
-            <td><?= formatDateTime($t['created_at']) ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<?php include 'includes/footer.php'; ?>
+        <div class="d-flex gap-2">
+            <form class="d-flex gap-2" method="GET">
