@@ -1,7 +1,9 @@
 <?php
 require_once 'includes/helpers.php';
 $pageTitle = 'Tarjetas de Presentación';
-$pdo = getConnection();
+include 'includes/header.php';
+?>
+
 
 $action = $_GET['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
