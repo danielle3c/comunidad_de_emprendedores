@@ -163,6 +163,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 </a>
 
 
+
       <a href="usuarios.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='usuarios.php')?'active':'' ?>">
         <i class="bi bi-people"></i> Usuarios
       </a>
