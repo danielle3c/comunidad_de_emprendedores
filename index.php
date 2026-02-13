@@ -35,6 +35,7 @@ $cards = [
     ['label'=>'Recaudado este mes','value'=>formatMoney($stats['cobranzas_mes']),'icon'=>'cash-coin','color'=>'success','url'=>'cobranzas.php'],
     ['label'=>'Talleres Programados','value'=>$stats['talleres'],'icon'=>'book','color'=>'secondary','url'=>'talleres.php'],
     ['label'=>'Usuarios Activos','value'=>$stats['usuarios'],'icon'=>'people','color'=>'dark','url'=>'usuarios.php'],
+     ['label'=>'Tarjetas de Presentación','value'=>$stats['tarjetas'],'icon'=>'person-vcard','color'=>'primary','url'=>'tarjetas_presentacion.php'],
 ];
 foreach ($cards as $c): ?>
 <div class="col-sm-6 col-md-4 col-lg-3">
