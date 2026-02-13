@@ -109,7 +109,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
   <div class="sidebar d-flex flex-column">
     <div class="brand">
       <div class="title"><i class="bi bi-people-fill me-2"></i>Emprendedores</div>
-      <div class="sub">Sistema de Gestión</div>
+<div style="color:#fff; font-size:12px; opacity:.7; padding-top:6px;">
+  HEADER OK - TARJETAS
+</div>
     </div>
 
     <nav class="flex-grow-1 py-2">
