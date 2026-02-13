@@ -1,7 +1,8 @@
 <?php
-require_once 'includes/helpers.php';
-$pageTitle = 'Dashboard';
+require_once __DIR__ . '/includes/helpers.php';
+
 $pdo = getConnection();
+
 
 $stats = [
     'personas'       => $pdo->query("SELECT COUNT(*) FROM personas WHERE estado=1")->fetchColumn(),
