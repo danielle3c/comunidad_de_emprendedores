@@ -1,15 +1,18 @@
 <?php
-// Define $activePage en cada página: 'index', 'personas', 'emprendedores', etc.
 $activePage = $activePage ?? '';
-function activeClass($key, $activePage){
+function activeClass(string $key, string $activePage): string {
   return $key === $activePage ? 'active' : '';
 }
 ?>
-
 <aside class="sidebar">
   <div class="sidebar-head">
-    <div class="sidebar-title">Menú</div>
-    <div class="sidebar-subtitle">Gestión del sistema</div>
+    <div class="sidebar-brand">
+      <div class="sidebar-badge"><i class="bi bi-building"></i></div>
+      <div>
+        <div class="sidebar-title">Menú</div>
+        <div class="sidebar-subtitle">Gestión del sistema</div>
+      </div>
+    </div>
   </div>
 
   <nav class="sidebar-nav">
@@ -71,16 +74,4 @@ function activeClass($key, $activePage){
     </a>
 
     <a class="sidebar-link <?= activeClass('auditoria',$activePage) ?>" href="auditoria.php">
-      <i class="bi bi-shield-check"></i><span>Auditoría</span>
-    </a>
-
-    <a class="sidebar-link <?= activeClass('config',$activePage) ?>" href="configuraciones.php">
-      <i class="bi bi-gear"></i><span>Configuración</span>
-    </a>
-
-    <a class="sidebar-link <?= activeClass('usuarios',$activePage) ?>" href="usuarios.php">
-      <i class="bi bi-person-gear"></i><span>Usuarios</span>
-    </a>
-
-  </nav>
-</aside>
+      <i class="bi bi-shield-check"></i
