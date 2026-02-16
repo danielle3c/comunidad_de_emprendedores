@@ -11,20 +11,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="assets/css/app.css" rel="stylesheet">
 
-  <style>
-    :root{
-      --bg:#f6f8fb;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:#e7eef7;
-      --shadow:0 10px 30px rgba(15,23,42,.06);
-      --shadow-sm:0 6px 18px rgba(15,23,42,.05);
-      --radius:16px;
-      --sidebar:#0f172a;
-      --sidebar2:#111c33;
-    }
+
 
     body{ background:var(--bg); font-size:.92rem; color:var(--text); }
 

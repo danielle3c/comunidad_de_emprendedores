@@ -1,77 +1,63 @@
-<?php
-$activePage = $activePage ?? '';
-function activeClass(string $key, string $activePage): string {
-  return $key === $activePage ? 'active' : '';
-}
-?>
-<aside class="sidebar">
-  <div class="sidebar-head">
-    <div class="sidebar-brand">
-      <div class="sidebar-badge"><i class="bi bi-building"></i></div>
-      <div>
-        <div class="sidebar-title">Menú</div>
-        <div class="sidebar-subtitle">Gestión del sistema</div>
-      </div>
-    </div>
-  </div>
+<div class="sidebar p-3" style="width:260px; background:linear-gradient(180deg,#0f172a,#111c33); min-height:100vh; color:#fff;">
 
-  <nav class="sidebar-nav">
+  <h5 class="fw-bold mb-4">Comunidad</h5>
 
-    <a class="sidebar-link <?= activeClass('index',$activePage) ?>" href="index.php">
-      <i class="bi bi-speedometer2"></i><span>Panel</span>
-    </a>
+  <a href="index.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+  </a>
 
-    <div class="sidebar-section">Registros</div>
+  <a href="personas.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-people me-2"></i> Personas
+  </a>
 
-    <a class="sidebar-link <?= activeClass('personas',$activePage) ?>" href="personas.php">
-      <i class="bi bi-people"></i><span>Personas</span>
-    </a>
+  <a href="emprendedores.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-briefcase me-2"></i> Emprendedores
+  </a>
 
-    <a class="sidebar-link <?= activeClass('emprendedores',$activePage) ?>" href="emprendedores.php">
-      <i class="bi bi-briefcase"></i><span>Emprendedores</span>
-    </a>
+  <a href="contratos.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-file-earmark-text me-2"></i> Contratos
+  </a>
 
-    <div class="sidebar-section">Finanzas</div>
+  <a href="creditos.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-cash-coin me-2"></i> Créditos
+  </a>
 
-    <a class="sidebar-link <?= activeClass('contratos',$activePage) ?>" href="contratos.php">
-      <i class="bi bi-file-earmark-text"></i><span>Contratos</span>
-    </a>
+  <a href="cobranzas.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-wallet2 me-2"></i> Cobranzas
+  </a>
 
-    <a class="sidebar-link <?= activeClass('creditos',$activePage) ?>" href="creditos.php">
-      <i class="bi bi-cash-stack"></i><span>Créditos</span>
-    </a>
+  <a href="talleres.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-easel me-2"></i> Talleres
+  </a>
 
-    <a class="sidebar-link <?= activeClass('cobranzas',$activePage) ?>" href="cobranzas.php">
-      <i class="bi bi-receipt"></i><span>Cobranzas</span>
-    </a>
+  <a href="carritos.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-shop me-2"></i> Carritos
+  </a>
 
-    <div class="sidebar-section">Actividades</div>
+  <a href="encuestas.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-clipboard-data me-2"></i> Encuestas
+  </a>
 
-    <a class="sidebar-link <?= activeClass('talleres',$activePage) ?>" href="talleres.php">
-      <i class="bi bi-calendar-event"></i><span>Talleres</span>
-    </a>
+  <a href="documentos.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-folder2-open me-2"></i> Documentos
+  </a>
 
-    <a class="sidebar-link <?= activeClass('inscripciones',$activePage) ?>" href="inscripciones_talleres.php">
-      <i class="bi bi-person-check"></i><span>Inscripciones</span>
-    </a>
+  <a href="auditoria.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-shield-check me-2"></i> Auditoría
+  </a>
 
-    <a class="sidebar-link <?= activeClass('jornadas',$activePage) ?>" href="jornadas.php">
-      <i class="bi bi-geo-alt"></i><span>Jornadas</span>
-    </a>
+  <a href="usuarios.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-person-gear me-2"></i> Usuarios
+  </a>
 
-    <a class="sidebar-link <?= activeClass('carritos',$activePage) ?>" href="carritos.php">
-      <i class="bi bi-shop"></i><span>Carritos</span>
-    </a>
+  <a href="configuraciones.php" class="d-block text-white mb-2 text-decoration-none">
+    <i class="bi bi-gear me-2"></i> Configuración
+  </a>
 
-    <div class="sidebar-section">Herramientas</div>
+  <hr class="text-white">
 
-    <a class="sidebar-link <?= activeClass('encuestas',$activePage) ?>" href="encuestas.php">
-      <i class="bi bi-ui-checks"></i><span>Encuestas</span>
-    </a>
+  <a href="logout.php" class="d-block text-danger text-decoration-none">
+    <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+  </a>
 
-    <a class="sidebar-link <?= activeClass('documentos',$activePage) ?>" href="documentos.php">
-      <i class="bi bi-folder2-open"></i><span>Documentos</span>
-    </a>
-
-    <a class="sidebar-link <?= activeClass('auditoria',$activePage) ?>" href="auditoria.php">
-      <i class="bi bi-shield-check"></i
+</div>
