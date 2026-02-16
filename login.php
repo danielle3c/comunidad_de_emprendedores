@@ -1,21 +1,18 @@
 <?php
 require_once __DIR__ . '/includes/security.php';
-require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/csrf.php';
 
 secure_session_start();
-csrf_verify();
 
-$pdo = getConnection();
-
-$username = trim($_POST['username'] ?? '');
-$password = (string)($_POST['password'] ?? '');
-
-if ($username === '' || $password === '') {
-    $_SESSION['flash_error'] = 'Debe ingresar usuario y contraseña.';
-    header('Location: login.php');
-    exit;
+if (isset($_SESSION['user'])) {
+  header('Location: index.php');
+  exit;
 }
+
+$error = $_SESSION['flash_error'] ?? '';
+unset($_SESSION['flash_error']);
+?>
+
 
 /* ==========================
    PROTECCIÓN BÁSICA ANTI-BRUTEFORCE
