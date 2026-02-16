@@ -3,19 +3,20 @@ require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Documentos';
 $pdo = getConnection();
 
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 $action = $_GET['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
 
-// Emprendedor fijo (debe existir en la tabla emprendedores)
-$DEFAULT_EMPRENDEDOR_ID = (int)$pdo->query("SELECT idemprendedores FROM emprendedores ORDER BY idemprendedores ASC LIMIT 1")->fetchColumn();
+// ✅ Usuario logueado (CAMBIAR si tu sesión usa otro nombre)
+$usuario_id = (int)($_SESSION['idUsuarios'] ?? 0);
 
-if ($DEFAULT_EMPRENDEDOR_ID <= 0) {
-    setFlash('error', 'No hay emprendedores creados. Cree un emprendedor primero para poder subir documentos.');
-    redirect('emprendedores.php?action=create');
+if ($usuario_id <= 0) {
+    setFlash('error', 'Debe iniciar sesión para subir documentos.');
+    redirect('login.php'); // ajusta si tu login tiene otro nombre
 }
 
-
-// Carpeta de uploads
+// Carpeta uploads
 define('UPLOAD_DIR', __DIR__ . '/uploads/documentos/');
 if (!is_dir(UPLOAD_DIR)) {
     @mkdir(UPLOAD_DIR, 0755, true);
@@ -29,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rutaArchivo = '';
     $tamano_kb = 0;
 
-    // subir archivo (si viene)
     if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
 
         $ext = strtolower(pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION));
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $data = [
-        'emprendedores_idemprendedores' => DEFAULT_EMPRENDEDOR_ID,
+        'usuario_id'       => $usuario_id,
         'nombre_documento' => sanitize($_POST['nombre_documento'] ?? ''),
         'tipo_documento'   => sanitize($_POST['tipo_documento'] ?? ''),
         'descripcion'      => sanitize($_POST['descripcion'] ?? ''),
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['id']           = (int)$_POST['id'];
 
             $sql = "UPDATE documentos
-                    SET emprendedores_idemprendedores=:emprendedores_idemprendedores,
+                    SET usuario_id=:usuario_id,
                         nombre_documento=:nombre_documento,
                         tipo_documento=:tipo_documento,
                         ruta_archivo=:ruta_archivo,
@@ -90,9 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['tamano_kb']    = $tamano_kb;
 
             $sql = "INSERT INTO documentos
-                    (emprendedores_idemprendedores,nombre_documento,tipo_documento,ruta_archivo,tamano_kb,descripcion)
+                    (usuario_id, nombre_documento, tipo_documento, ruta_archivo, tamano_kb, descripcion)
                     VALUES
-                    (:emprendedores_idemprendedores,:nombre_documento,:tipo_documento,:ruta_archivo,:tamano_kb,:descripcion)";
+                    (:usuario_id, :nombre_documento, :tipo_documento, :ruta_archivo, :tamano_kb, :descripcion)";
 
             $pdo->prepare($sql)->execute($data);
             setFlash('success','Documento subido.');
@@ -142,11 +142,12 @@ if ($action === 'edit' && $id) {
 }
 
 // =========
-// LISTAR
+// LISTAR (solo del usuario logueado)
 // =========
-$rows = $pdo->query("SELECT * FROM documentos ORDER BY fecha_subida DESC")->fetchAll();
+$stmt = $pdo->prepare("SELECT * FROM documentos WHERE usuario_id=? ORDER BY fecha_subida DESC");
+$stmt->execute([$usuario_id]);
+$rows = $stmt->fetchAll();
 
-// ✅ IMPORTANTE: incluir header SOLO UNA VEZ
 include __DIR__ . '/includes/header.php';
 ?>
 
