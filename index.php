@@ -4,7 +4,7 @@
     <div class="card-modern">
       <div class="card-modern-body">
         <div class="text-muted">Personas</div>
-        <h4 class="fw-bold"><?= $totalPersonas ?></h4>
+        <h4 class="fw-bold"><?= (int)$stats['personas'] ?></h4>
       </div>
     </div>
   </div>
@@ -13,7 +13,7 @@
     <div class="card-modern">
       <div class="card-modern-body">
         <div class="text-muted">Emprendedores</div>
-        <h4 class="fw-bold"><?= $totalEmprendedores ?></h4>
+        <h4 class="fw-bold"><?= (int)$stats['emprendedores'] ?></h4>
       </div>
     </div>
   </div>
