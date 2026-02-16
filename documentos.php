@@ -30,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $data = [
-        'emprendedores_idemprendedores' => (int)$_POST['emprendedores_idemprendedores'],
         'nombre_documento' => sanitize($_POST['nombre_documento']),
         'tipo_documento'   => sanitize($_POST['tipo_documento'] ?? ''),
         'descripcion'      => sanitize($_POST['descripcion'] ?? ''),
