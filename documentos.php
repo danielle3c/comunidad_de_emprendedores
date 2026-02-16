@@ -7,7 +7,13 @@ $action = $_GET['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
 
 // Emprendedor fijo (debe existir en la tabla emprendedores)
-define('DEFAULT_EMPRENDEDOR_ID', 1);
+$DEFAULT_EMPRENDEDOR_ID = (int)$pdo->query("SELECT idemprendedores FROM emprendedores ORDER BY idemprendedores ASC LIMIT 1")->fetchColumn();
+
+if ($DEFAULT_EMPRENDEDOR_ID <= 0) {
+    setFlash('error', 'No hay emprendedores creados. Cree un emprendedor primero para poder subir documentos.');
+    redirect('emprendedores.php?action=create');
+}
+
 
 // Carpeta de uploads
 define('UPLOAD_DIR', __DIR__ . '/uploads/documentos/');
