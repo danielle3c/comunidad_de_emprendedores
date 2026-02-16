@@ -1,181 +1,212 @@
 <?php
+// Asegura sesión antes de cualquier salida
 if (session_status() === PHP_SESSION_NONE) session_start();
-
-$pageTitle  = $pageTitle ?? 'Sistema Comunidad de Emprendedores';
-$activePage = $activePage ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= $pageTitle ?? 'Comunidad de Emprendedores' ?></title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#f4f6f9; --text:#0f172a; --muted:#64748b; --card:#ffffff;
-      --radius:16px; --shadow:0 10px 25px rgba(0,0,0,0.08);
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e7eef7;
+      --shadow:0 10px 30px rgba(15,23,42,.06);
+      --shadow-sm:0 6px 18px rgba(15,23,42,.05);
+      --radius:16px;
+      --sidebar:#0f172a;
+      --sidebar2:#111c33;
     }
-    body{ font-family:'Inter', sans-serif; background:var(--bg); color:var(--text); }
 
-    /* Topbar */
-    .topbar{
-      background: linear-gradient(90deg, #0d47a1, #1565c0);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      padding: 10px 16px;
-    }
-    .topbar .navbar-brand{
-      font-size: 1rem;
-      letter-spacing: .3px;
-      display:flex;
-      align-items:center;
-      gap:.5rem;
-    }
-    .search-box{ max-width: 520px; width: 100%; }
-    .search-box input{
-      border-radius: 20px;
-      padding-left: 14px;
-      border: 1px solid rgba(255,255,255,0.25);
-    }
-    .search-box button{
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.25);
-    }
-    .dropdown-menu{ border-radius: 12px; }
+    body{ background:var(--bg); font-size:.92rem; color:var(--text); }
 
-    /* Layout (PC) */
-    .layout{ display:flex; min-height: calc(100vh - 60px); }
-
-    /* Sidebar (PC) */
+    /* Sidebar */
     .sidebar{
-      width: 280px;
-      background: #0b1220;
-      color: #e5e7eb;
-      padding: 14px 12px;
-      border-right: 1px solid rgba(255,255,255,0.06);
+      min-height:100vh; width:252px; position:fixed; top:0; left:0; z-index:100;
+      background: linear-gradient(180deg, var(--sidebar), var(--sidebar2));
+      border-right:1px solid rgba(255,255,255,.06);
+      overflow-y:auto;
     }
-    .sidebar-head{
-      padding: 10px 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 10px;
+    .sidebar .brand{
+      padding:1.2rem 1rem;
+      border-bottom:1px solid rgba(255,255,255,.08);
     }
-    .sidebar-brand{ display:flex; align-items:center; gap:12px; }
-    .sidebar-badge{
-      width:38px; height:38px;
-      border-radius: 12px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(59,130,246,0.18);
-      outline: 1px solid rgba(59,130,246,0.22);
-    }
-    .sidebar-title{ font-weight: 800; font-size: 1rem; }
-    .sidebar-subtitle{ font-size: .8rem; color: rgba(229,231,235,0.65); }
+    .sidebar .brand .title{ color:#fff; font-weight:800; letter-spacing:-.02em; }
+    .sidebar .brand .sub{ color:rgba(255,255,255,.55); font-size:.78rem; }
 
-    .sidebar-section{
-      margin: 14px 10px 6px;
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: rgba(229,231,235,0.55);
+    .sidebar .nav-section{
+      font-size:.72rem; text-transform:uppercase; letter-spacing:.12em;
+      color:rgba(255,255,255,.35); padding:1rem 1rem .35rem;
     }
-
-    .sidebar-nav{ display:flex; flex-direction:column; gap:4px; }
-    .sidebar-link{
-      display:flex; align-items:center; gap:10px;
-      padding: 10px 10px;
-      border-radius: 12px;
-      color: rgba(229,231,235,0.92);
-      text-decoration:none;
-      transition: all .15s ease;
+    .sidebar .nav-link{
+      color:rgba(255,255,255,.70);
+      padding:.55rem .9rem;
+      border-radius:12px;
+      margin:3px 10px;
+      font-size:.9rem;
+      display:flex; align-items:center; gap:.55rem;
     }
-    .sidebar-link i{ font-size: 1.1rem; width: 22px; text-align:center; opacity:.95; }
-    .sidebar-link:hover{ background: rgba(255,255,255,0.08); color:#fff; }
-    .sidebar-link.active{
-      background: rgba(59,130,246,0.18);
-      outline: 1px solid rgba(59,130,246,0.25);
-      color:#fff;
+    .sidebar .nav-link:hover{ background:rgba(255,255,255,.08); color:#fff; }
+    .sidebar .nav-link.active{ background:rgba(255,255,255,.14); color:#fff; }
+
+    /* Main */
+    .main-content{ margin-left:252px; min-height:100vh; }
+    .topbar{
+      position:sticky; top:0; z-index:90;
+      background:rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:.75rem 1.25rem;
     }
+    .content-area{ padding: 1.25rem; }
 
-    /* Content */
-    .content{ flex:1; padding: 18px 18px 28px; }
+    /* Cards / tables */
+    .card{ border:1px solid var(--border); border-radius:var(--radius); box-shadow:none; }
+    .card-soft{ background:var(--card); box-shadow:var(--shadow-sm); }
+    .card-hover{ transition: transform .15s ease, box-shadow .15s ease; }
+    .card-hover:hover{ transform: translateY(-2px); box-shadow:var(--shadow); }
 
-    /* Cards */
-    .dashboard-card{
-      border:none; border-radius:var(--radius); background:var(--card);
-      transition:all .25s ease; box-shadow:0 6px 18px rgba(15,23,42,.06);
+    .table thead th{
+      font-size:.78rem; text-transform:uppercase; letter-spacing:.06em;
+      color:#64748b; font-weight:800; background:#fff;
+      position:sticky; top:0; z-index:1;
+      border-bottom:1px solid var(--border) !important;
     }
-    .dashboard-card:hover{ transform:translateY(-5px); box-shadow:var(--shadow); }
+    .table td{ border-top:1px solid var(--border); vertical-align:middle; }
+    .table-wrap{ max-height:360px; overflow:auto; border-radius:var(--radius); }
 
-    /* Responsive: en móvil se oculta SOLO el sidebar fijo, pero se abre por botón */
-    @media (max-width: 992px){
-      .sidebar{ display:none; } /* se oculta en layout */
-      .content{ padding: 14px; }
-      .search-box{ max-width: 100%; }
+    .btn, .form-control, .input-group-text{ border-radius:12px; }
+    .form-control, .input-group-text{ border:1px solid var(--border); }
+    .form-control:focus{
+      border-color: rgba(13,110,253,.35);
+      box-shadow: 0 0 0 .25rem rgba(13,110,253,.10);
     }
 
-    /* Para que el sidebar dentro del offcanvas sí se vea */
-    .offcanvas .sidebar{
-      display:block !important;
-      width: 100%;
-      border-right: none;
-      height: auto;
+    .badge{ border-radius:999px; padding:.45em .75em; font-weight:800; }
+    .kpi-icon{ width:52px; height:52px; }
+
+    /* Responsive */
+    @media(max-width: 992px){
+      .sidebar{ position:relative; width:100%; min-height:auto; }
+      .main-content{ margin-left:0; }
+      .topbar{ position:relative; }
     }
   </style>
 </head>
 
 <body>
+<div class="d-flex">
 
-<!-- TOPBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark topbar">
-  <div class="container-fluid">
-
-    <!-- Botón menú (solo móvil) -->
-    <button class="btn btn-outline-light d-lg-none me-2" type="button"
-            data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
-            aria-controls="mobileMenu" aria-label="Abrir menú">
-      <i class="bi bi-list"></i>
-    </button>
-
-    <a class="navbar-brand fw-semibold" href="index.php">
-      <i class="bi bi-people-fill"></i>
-      Comunidad de Emprendedores
-    </a>
-
-    <form class="d-flex mx-auto search-box my-2 my-lg-0" method="GET" action="personas.php">
-      <input class="form-control me-2" type="search" name="q" placeholder="Buscar por RUT, nombre o apellido">
-      <button class="btn btn-light" type="submit" title="Buscar"><i class="bi bi-search"></i></button>
-    </form>
-
-    <div class="dropdown">
-      <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">
-        <i class="bi bi-person-circle me-1"></i>
-        <?= htmlspecialchars($_SESSION['usuario'] ?? 'Admin') ?>
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="usuarios.php"><i class="bi bi-person-gear me-2"></i>Usuarios</a></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
-      </ul>
+  <!-- SIDEBAR -->
+  <div class="sidebar d-flex flex-column">
+    <div class="brand">
+      <div class="title"><i class="bi bi-people-fill me-2"></i>Emprendedores</div>
+<div style="color:#fff; font-size:12px; opacity:.7; padding-top:6px;">
+  HEADER OK - TARJETAS
+</div>
     </div>
 
-  </div>
-</nav>
+    <nav class="flex-grow-1 py-2">
+      <div class="nav-section">Principal</div>
+      <a href="index.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='index.php')?'active':'' ?>">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
 
-<!-- OFFCANVAS (MENÚ MÓVIL) -->
-<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="mobileMenuLabel">Menú</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-  </div>
-  <div class="offcanvas-body p-0">
-    <?php require_once __DIR__ . '/sidebar.php'; ?>
-  </div>
-</div>
+      <div class="nav-section">Personas</div>
+      <a href="personas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='personas.php')?'active':'' ?>">
+        <i class="bi bi-person"></i> Personas
+      </a>
+      <a href="emprendedores.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='emprendedores.php')?'active':'' ?>">
+        <i class="bi bi-briefcase"></i> Emprendedores
+      </a>
 
-<!-- LAYOUT (PC) -->
-<div class="layout">
-  <?php require_once __DIR__ . '/sidebar.php'; ?>
-  <main class="content">
+      <div class="nav-section">Finanzas</div>
+      <a href="contratos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='contratos.php')?'active':'' ?>">
+        <i class="bi bi-file-earmark-text"></i> Contratos
+      </a>
+      <a href="creditos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='creditos.php')?'active':'' ?>">
+        <i class="bi bi-credit-card"></i> Créditos
+      </a>
+      <a href="cobranzas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='cobranzas.php')?'active':'' ?>">
+        <i class="bi bi-cash-coin"></i> Cobranzas
+      </a>
+
+      <div class="nav-section">Actividades</div>
+      <a href="talleres.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='talleres.php')?'active':'' ?>">
+        <i class="bi bi-book"></i> Talleres
+      </a>
+      <a href="inscripciones_talleres.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='inscripciones_talleres.php')?'active':'' ?>">
+        <i class="bi bi-journal-check"></i> Inscripciones
+      </a>
+      <a href="jornadas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='jornadas.php')?'active':'' ?>">
+        <i class="bi bi-calendar-event"></i> Jornadas
+      </a>
+      <a href="carritos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='carritos.php')?'active':'' ?>">
+        <i class="bi bi-cart3"></i> Carritos
+      </a>
+
+      <div class="nav-section">Otros</div>
+      <a href="encuestas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='encuestas.php')?'active':'' ?>">
+        <i class="bi bi-clipboard-data"></i> Encuestas
+      </a>
+      <a href="documentos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='documentos.php')?'active':'' ?>">
+        <i class="bi bi-folder"></i> Documentos
+      </a>
+      <a href="tarjetas_presentacion.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='tarjetas_presentacion.php')?'active':'' ?>">
+  <i class="bi bi-person-vcard"></i> Tarjetas de Presentación
+</a>
+
+
+
+      <a href="usuarios.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='usuarios.php')?'active':'' ?>">
+        <i class="bi bi-people"></i> Usuarios
+      </a>
+      <a href="auditoria.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='auditoria.php')?'active':'' ?>">
+        <i class="bi bi-shield-check"></i> Auditoría
+      </a>
+      <a href="configuraciones.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='configuraciones.php')?'active':'' ?>">
+        <i class="bi bi-gear"></i> Configuración
+      </a>
+    </nav>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content flex-grow-1">
+
+    <!-- TOPBAR con buscador -->
+    <div class="topbar">
+      <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <h6 class="mb-0 fw-bold"><?= $pageTitle ?? '' ?></h6>
+          <span class="text-muted" style="font-size:.82rem"><?= date('d/m/Y H:i') ?></span>
+        </div>
+
+        <div class="position-relative" style="max-width:560px; width:100%;">
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input id="smartSearch" type="text" class="form-control"
+                   placeholder="Buscar persona por RUT o nombre..."
+                   autocomplete="off">
+          </div>
+
+          <div id="smartResults" class="list-group position-absolute w-100 mt-2 shadow-sm"
+               style="z-index:9999; display:none; max-height:340px; overflow:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <?php if ($flash = getFlash()): ?>
+        <div class="alert alert-<?= $flash['type'] === 'success' ? 'success' : 'danger' ?> border-0 shadow-sm rounded-4">
+          <?= htmlspecialchars($flash['message']) ?>
+        </div>
+      <?php endif; ?>
