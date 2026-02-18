@@ -398,22 +398,6 @@ body {
     transform: scale(1.2);
 }
 
-/* ===== FONDO COMPLETAMENTE LIMPIO (OPCIÓN 1) ===== */
-.bg-canvas {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: var(--bg-body);  /* Fondo sólido del color del tema */
-    overflow: hidden;
-}
-
-.hex-svg {
-    display: none;  /* Oculta los hexágonos */
-}
-
-.bg-canvas::before {
-    display: none;  /* Oculta los gradientes */
-}
 
 /* ===== BÚSQUEDA INTELIGENTE ===== */
 #smartResults {
