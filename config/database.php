@@ -8,7 +8,7 @@ function getConnection(): PDO {
         // Configuración de la base de datos - AJUSTA ESTOS VALORES
         $host = 'localhost';      // Casi siempre es localhost
         $port = '3306';           // Puerto de MySQL (default: 3306)
-        $dbname = 'comunidad_emprendedores';  // Nombre de tu base de datos
+        $dbname = 'comunidad_de_emprendedores';  // Nombre de tu base de datos
         $username = 'root';        // Usuario de MySQL (default en XAMPP: root)
         $password = '';            // Contraseña (default en XAMPP: vacío)
         $charset = 'utf8mb4';
