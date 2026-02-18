@@ -181,22 +181,6 @@ body {
     color: var(--brand-pick);
 }
 
-/* ===== MAIN CONTENT ===== */
-.main-content {
-    min-height: 100vh;
-    padding: 0;
-}
-
-.topbar {
-    padding: 1rem 1.5rem;
-    background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 1.5rem;
-}
-
-.content-area {
-    padding: 0 1.5rem 1.5rem 1.5rem;
-}
 
 /* ===== CARDS ===== */
 .card {
