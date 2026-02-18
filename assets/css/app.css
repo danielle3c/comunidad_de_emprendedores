@@ -322,23 +322,16 @@ body {
     position: fixed;
     inset: 0;
     z-index: -1;
+    background: var(--bg-body);  /* Fondo sólido del color del tema */
     overflow: hidden;
-    pointer-events: none;
-}
-
-.bg-canvas::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: 
-        radial-gradient(ellipse 70% 55% at 10% 15%, var(--brand-glow), transparent 55%),
-        radial-gradient(ellipse 55% 65% at 92% 85%, var(--brand-dim), transparent 55%);
 }
 
 .hex-svg {
-    width: 100%;
-    height: 100%;
-    opacity: 0.04;
+    display: none;  /* Oculta los hexágonos */
+}
+
+.bg-canvas::before {
+    display: none;  /* Oculta los gradientes */
 }
 
 #smartResults {
