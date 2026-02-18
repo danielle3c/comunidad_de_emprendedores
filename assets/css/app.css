@@ -442,3 +442,46 @@ body {
     color: var(--text-secondary);
     opacity: 0.5;
 }
+
+/* ===== FONDO PARA LOGIN (con hexágonos) ===== */
+body.login-page .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: transparent;
+}
+
+body.login-page .bg-canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 80% 60% at 15% 20%, var(--brand-pick-glow), transparent 55%),
+        radial-gradient(ellipse 60% 70% at 85% 80%, rgba(67,176,42,0.12), transparent 55%);
+}
+
+body.login-page .hex-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+}
+
+body.login-page .hex-grid svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== FONDO PARA PÁGINAS INTERNAS (sin hexágonos) ===== */
+.bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-body);
+}
+
+.bg-canvas::before,
+.hex-grid {
+    display: none;
+}

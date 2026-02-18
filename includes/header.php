@@ -1,5 +1,5 @@
 <?php
-// includes/header.php
+// includes/header.php - SIN HEXÁGONOS (solo para páginas internas)
 if (!defined('FROM_LAYOUT')):
 ?>
 <!DOCTYPE html>
@@ -15,7 +15,8 @@ if (!defined('FROM_LAYOUT')):
 </head>
 <body>
 
-
+<!-- Fondo limpio para páginas internas (sin hexágonos) -->
+<div class="bg-canvas" style="background: var(--bg-body);"></div>
 
 <div class="sys-controls">
   <button class="sys-btn" onclick="sysToggleTheme()" id="sysThemeBtn" title="Cambiar tema">
