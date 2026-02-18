@@ -15,7 +15,6 @@ if (!defined('FROM_LAYOUT')):
 </head>
 <body>
 
-<!-- Fondo animado -->
 <div class="bg-canvas">
   <svg class="hex-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
     <defs>
@@ -27,10 +26,7 @@ if (!defined('FROM_LAYOUT')):
   </svg>
 </div>
 
-<!-- ===== CONTROLES FLOTANTES ===== -->
 <div class="sys-controls">
-
-  <!-- Tema oscuro/claro -->
   <button class="sys-btn" onclick="sysToggleTheme()" id="sysThemeBtn" title="Cambiar tema">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="5"/>
@@ -42,7 +38,6 @@ if (!defined('FROM_LAYOUT')):
     <span id="sysThemeLabel">Claro</span>
   </button>
 
-  <!-- Color picker -->
   <button class="sys-btn" onclick="document.getElementById('colorPickerGlobal').click()" title="Cambiar color">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
@@ -54,7 +49,6 @@ if (!defined('FROM_LAYOUT')):
            style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
   </button>
 
-  <!-- Copiar fondo -->
   <button class="sys-btn" onclick="sysCopyBg()" title="Copiar CSS del fondo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <rect x="9" y="9" width="13" height="13" rx="2"/>
@@ -63,7 +57,6 @@ if (!defined('FROM_LAYOUT')):
     Fondo
   </button>
 
-  <!-- Exportar PDF -->
   <button class="sys-btn" onclick="sysExportPDF()" title="Exportar como PDF">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -73,16 +66,13 @@ if (!defined('FROM_LAYOUT')):
     PDF
   </button>
 
-  <!-- Idioma -->
   <select class="lang-select" onchange="sysSetLang(this.value)" id="sysLangSelect" title="Idioma">
     <option value="es">🇨🇱 ES</option>
     <option value="en">🇺🇸 EN</option>
     <option value="pt">🇧🇷 PT</option>
   </select>
-
 </div>
 
-<!-- ===== BARRA DE BRILLO ===== -->
 <div class="brightness-rail" title="Ajustar brillo">
   <span class="rail-label">Brillo</span>
   <input type="range" id="sysBrightnessBar" min="40" max="140" value="100"
@@ -93,22 +83,19 @@ if (!defined('FROM_LAYOUT')):
   </svg>
 </div>
 
-<!-- Toast global -->
 <div class="sys-toast" id="sysToast"></div>
 
 <div class="d-flex">
   <?php include __DIR__ . '/sidebar.php'; ?>
   <div class="main-content flex-grow-1">
-<?php endif; // FROM_LAYOUT ?>
+<?php endif; ?>
 
-    <!-- TOPBAR -->
     <div class="topbar">
       <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <h6 class="mb-0 fw-bold" style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:.03em">
           <?= htmlspecialchars($pageTitle ?? '', ENT_QUOTES, 'UTF-8') ?>
         </h6>
 
-        <!-- Búsqueda inteligente -->
         <div class="position-relative" style="max-width:520px;width:100%">
           <div class="input-group input-group-sm">
             <span class="input-group-text"><i class="bi bi-search"></i></span>

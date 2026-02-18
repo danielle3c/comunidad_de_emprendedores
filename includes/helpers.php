@@ -3,7 +3,6 @@
 
 require_once __DIR__ . '/../config/database.php';
 
-// Iniciar sesión una sola vez (via security.php si está disponible)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -87,11 +86,9 @@ function renderPagination(array $pag, string $baseUrl): string {
 
     $html = '<nav aria-label="Paginación"><ul class="pagination justify-content-center mb-0">';
 
-    // Anterior
     $dis = $p <= 1 ? ' disabled' : '';
     $html .= "<li class=\"page-item$dis\"><a class=\"page-link\" href=\"{$baseUrl}&page=" . ($p - 1) . "\">‹</a></li>";
 
-    // Páginas (máximo 7 visibles con elipsis)
     $range = [];
     for ($i = 1; $i <= $total; $i++) {
         if ($i === 1 || $i === $total || abs($i - $p) <= 2) {
@@ -108,10 +105,10 @@ function renderPagination(array $pag, string $baseUrl): string {
         $prev = $i;
     }
 
-    // Siguiente
     $dis = $p >= $total ? ' disabled' : '';
     $html .= "<li class=\"page-item$dis\"><a class=\"page-link\" href=\"{$baseUrl}&page=" . ($p + 1) . "\">›</a></li>";
 
     $html .= '</ul></nav>';
     return $html;
 }
+?>

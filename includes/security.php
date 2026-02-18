@@ -20,14 +20,12 @@ function secure_session_start(): void {
 
     session_start();
 
-    // Timeout de inactividad: 30 minutos
     $timeout = 30 * 60;
     $now     = time();
 
     if (isset($_SESSION['_last_activity']) && ($now - (int)$_SESSION['_last_activity']) > $timeout) {
         session_unset();
         session_destroy();
-        // Iniciar nueva sesión limpia para poder mostrar el mensaje
         session_start();
         $_SESSION['flash_error'] = 'Su sesión ha expirado. Por favor inicie sesión nuevamente.';
         header('Location: login.php');
@@ -36,3 +34,4 @@ function secure_session_start(): void {
 
     $_SESSION['_last_activity'] = $now;
 }
+?>

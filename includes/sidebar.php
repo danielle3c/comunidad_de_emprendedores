@@ -71,7 +71,6 @@ function navActive(string $file, string $current): string {
     </a>
   </nav>
 
-  <!-- Usuario y logout al pie del sidebar -->
   <div class="p-3" style="border-top:1px solid rgba(255,255,255,.10)">
     <div class="d-flex align-items-center gap-2">
       <div class="rounded-circle bg-white d-flex align-items-center justify-content-center" style="width:32px;height:32px;min-width:32px">
