@@ -236,11 +236,7 @@ body {
     color: white;
 }
 
-.kpi-icon {
-    width: 36px;  /* Antes 48px */
-    height: 36px; /* Antes 48px */
-    color: var(--brand-pick);
-}
+
 
 /* ===== TABLAS ===== */
 .table {
