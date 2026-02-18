@@ -1,58 +1,92 @@
 <?php
-require_once 'includes/auth_guard.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/includes/auth_guard.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/csrf.php';
+require_once __DIR__ . '/includes/roles.php';
+
+require_role(['admin']);
+
 $pageTitle = 'Configuración del Sistema';
 $pdo = getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_verify()) {
+        setFlash('error', 'Error de validación. Intente de nuevo.');
+        redirect('configuraciones.php');
+    }
+
     $data = [
-        'nombre_sistema'    => sanitize($_POST['nombre_sistema']),
-        'tema_color'        => sanitize($_POST['tema_color'] ?? 'light'),
-        'email_sistema'     => sanitize($_POST['email_sistema'] ?? ''),
-        'telefono_sistema'  => sanitize($_POST['telefono_sistema'] ?? ''),
-        'direccion_sistema' => sanitize($_POST['direccion_sistema'] ?? ''),
+        'nombre_sistema'    => sanitize(filter_input(INPUT_POST, 'nombre_sistema', FILTER_SANITIZE_STRING) ?? ''),
+        'tema_color'        => sanitize(filter_input(INPUT_POST, 'tema_color', FILTER_SANITIZE_STRING) ?? 'light'),
+        'email_sistema'     => filter_input(INPUT_POST, 'email_sistema', FILTER_VALIDATE_EMAIL) ?: null,
+        'telefono_sistema'  => sanitize(filter_input(INPUT_POST, 'telefono_sistema', FILTER_SANITIZE_STRING) ?? ''),
+        'direccion_sistema' => sanitize(filter_input(INPUT_POST, 'direccion_sistema', FILTER_SANITIZE_STRING) ?? ''),
     ];
 
     // Logo upload
     if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
-        $allowedMimes = ['image/jpeg','image/png','image/svg+xml','image/gif'];
+        $allowedExts = ['jpg', 'jpeg', 'png', 'svg', 'gif'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'];
+        
         $fileMime = mime_content_type($_FILES['logo']['tmp_name']);
-        if (in_array($ext, ['jpg','jpeg','png','svg','gif']) && in_array($fileMime, $allowedMimes)) {
-            $dir = __DIR__ . '/uploads/';
-            if (!is_dir($dir)) @mkdir($dir, 0755, true);
-            $nombre = 'logo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-            if (move_uploaded_file($_FILES['logo']['tmp_name'], $dir . $nombre)) {
-                $data['logo'] = 'uploads/' . $nombre;
+        
+        if (in_array($ext, $allowedExts) && in_array($fileMime, $allowedMimes)) {
+            $uploadDir = __DIR__ . '/uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            $newFilename = 'logo_' . time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+            $destination = $uploadDir . $newFilename;
+            
+            if (move_uploaded_file($_FILES['logo']['tmp_name'], $destination)) {
+                $data['logo'] = 'uploads/' . $newFilename;
+            } else {
+                setFlash('error', 'Error al guardar el archivo en el servidor.');
+                error_log("Error al mover archivo de logo a: " . $destination);
             }
         } else {
             setFlash('error', 'Tipo de archivo no permitido para el logo.');
         }
     } else {
-        // Restringir para que solo acepte rutas que empiecen con uploads/
-        $logoActual = sanitize($_POST['logo_actual'] ?? '');
-        $data['logo'] = str_starts_with($logoActual, 'uploads/') ? $logoActual : '';
+        $logoActual = filter_input(INPUT_POST, 'logo_actual', FILTER_SANITIZE_STRING) ?? '';
+        if (strpos($logoActual, 'uploads/') === 0 && strpos($logoActual, '..') === false) {
+            $data['logo'] = $logoActual;
+        } else {
+            $data['logo'] = '';
+        }
     }
 
     try {
-        $s = $pdo->query("SELECT id FROM configuraciones LIMIT 1");
-        $existing = $s->fetch();
+        $stmt = $pdo->query("SELECT id FROM configuraciones LIMIT 1");
+        $existing = $stmt->fetch();
+        
         if ($existing) {
-            $sets = implode(',', array_map(fn($k) => "$k=:$k", array_keys($data)));
-            $pdo->prepare("UPDATE configuraciones SET $sets WHERE id=1")->execute($data);
+            $sets = [];
+            foreach ($data as $col => $val) {
+                $sets[] = "$col = :$col";
+            }
+            $sql = "UPDATE configuraciones SET " . implode(', ', $sets) . " WHERE id = 1";
         } else {
-            $cols = implode(',',array_keys($data));
-            $vals = ':'.implode(',:', array_keys($data));
-            $pdo->prepare("INSERT INTO configuraciones ($cols) VALUES ($vals)")->execute($data);
+            $cols = implode(', ', array_keys($data));
+            $vals = ':' . implode(', :', array_keys($data));
+            $sql = "INSERT INTO configuraciones ($cols) VALUES ($vals)";
         }
-        setFlash('success','Configuración guardada correctamente.');
-    } catch (PDOException $e) { setFlash('error','Error: '.$e->getMessage()); }
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($data);
+        
+        setFlash('success', 'Configuración guardada correctamente.');
+    } catch (PDOException $e) {
+        setFlash('error', 'Error al guardar la configuración.');
+        error_log("Error en configuraciones.php: " . $e->getMessage());
+    }
     redirect('configuraciones.php');
 }
 
-$config = $pdo->query("SELECT * FROM configuraciones WHERE id=1")->fetch();
+$config = $pdo->query("SELECT * FROM configuraciones WHERE id = 1")->fetch();
 
-include 'includes/header.php';
+include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="row justify-content-center">
@@ -61,28 +95,32 @@ include 'includes/header.php';
     <div class="card-header bg-white border-0 fw-semibold">Configuración General del Sistema</div>
     <div class="card-body">
     <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
         <input type="hidden" name="logo_actual" value="<?= htmlspecialchars($config['logo'] ?? '') ?>">
 
         <div class="row g-3">
             <div class="col-md-8">
                 <label class="form-label">Nombre del Sistema *</label>
-                <input type="text" name="nombre_sistema" class="form-control" value="<?= $config['nombre_sistema'] ?? 'Sistema de Emprendedores' ?>" required>
+                <input type="text" name="nombre_sistema" class="form-control" 
+                       value="<?= htmlspecialchars($config['nombre_sistema'] ?? 'Sistema de Emprendedores') ?>" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Tema de Color</label>
                 <select name="tema_color" class="form-select">
-                    <?php foreach (['light'=>'Claro','dark'=>'Oscuro','blue'=>'Azul','green'=>'Verde'] as $val=>$label): ?>
+                    <?php foreach (['light' => 'Claro', 'dark' => 'Oscuro', 'blue' => 'Azul', 'green' => 'Verde'] as $val => $label): ?>
                     <option value="<?= $val ?>" <?= ($config['tema_color'] ?? 'light') === $val ? 'selected' : '' ?>><?= $label ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Email del Sistema</label>
-                <input type="email" name="email_sistema" class="form-control" value="<?= $config['email_sistema'] ?? '' ?>">
+                <input type="email" name="email_sistema" class="form-control" 
+                       value="<?= htmlspecialchars($config['email_sistema'] ?? '') ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Teléfono</label>
-                <input type="text" name="telefono_sistema" class="form-control" value="<?= $config['telefono_sistema'] ?? '' ?>">
+                <input type="text" name="telefono_sistema" class="form-control" 
+                       value="<?= htmlspecialchars($config['telefono_sistema'] ?? '') ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Logo</label>
@@ -93,15 +131,15 @@ include 'includes/header.php';
             </div>
             <div class="col-12">
                 <label class="form-label">Dirección</label>
-                <textarea name="direccion_sistema" class="form-control" rows="2"><?= $config['direccion_sistema'] ?? '' ?></textarea>
+                <textarea name="direccion_sistema" class="form-control" rows="2"><?= htmlspecialchars($config['direccion_sistema'] ?? '') ?></textarea>
             </div>
         </div>
 
         <?php if ($config): ?>
         <div class="mt-4 p-3 bg-light rounded">
             <div class="row text-muted" style="font-size:.8rem">
-                <div class="col-md-4"><strong>Creado:</strong> <?= formatDateTime($config['created_at']) ?></div>
-                <div class="col-md-4"><strong>Actualizado:</strong> <?= formatDateTime($config['updated_at']) ?></div>
+                <div class="col-md-4"><strong>Creado:</strong> <?= formatDateTime($config['created_at'] ?? null) ?></div>
+                <div class="col-md-4"><strong>Actualizado:</strong> <?= formatDateTime($config['updated_at'] ?? null) ?></div>
             </div>
         </div>
         <?php endif; ?>
@@ -113,15 +151,19 @@ include 'includes/header.php';
     </div>
 </div>
 
-<!-- Info del sistema -->
 <div class="card mt-3">
     <div class="card-header bg-white border-0 fw-semibold">Información del Sistema</div>
     <div class="card-body">
         <div class="row g-3 text-sm">
             <?php
-            $tablas = ['personas','emprendedores','Contratos','creditos','cobranzas','talleres','inscripciones_talleres','jornadas','carritos','encuesta_2026','documentos','Usuarios','auditoria'];
+            $tablas = ['personas', 'emprendedores', 'Contratos', 'creditos', 'cobranzas', 'talleres', 'inscripciones_talleres', 'jornadas', 'carritos', 'encuesta_2026', 'documentos', 'Usuarios', 'auditoria'];
             foreach ($tablas as $tbl):
-                try { $cnt = $pdo->query("SELECT COUNT(*) FROM `$tbl`")->fetchColumn(); } catch (Exception $e) { $cnt = 'Error'; }
+                try { 
+                    $cnt = $pdo->query("SELECT COUNT(*) FROM `$tbl`")->fetchColumn(); 
+                } catch (Exception $e) { 
+                    $cnt = 'Error'; 
+                    error_log("Error contando tabla $tbl: " . $e->getMessage());
+                }
             ?>
             <div class="col-md-4 col-6">
                 <div class="d-flex justify-content-between border-bottom py-1">
@@ -139,4 +181,4 @@ include 'includes/header.php';
 </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . '/includes/footer.php'; ?>

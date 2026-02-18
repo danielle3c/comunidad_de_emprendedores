@@ -1,82 +1,87 @@
 <?php
-require_once 'includes/auth_guard.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/includes/auth_guard.php';
+require_once __DIR__ . '/includes/helpers.php';
+
 $pdo = getConnection();
 
-$id = (int)($_GET['id'] ?? 0);
-if (!$id) redirect('personas.php');
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
+if (!$id) {
+    redirect('personas.php');
+}
 
 $pageTitle = 'Historial de Persona';
 
-/* PERSONA */
-$stmt = $pdo->prepare("SELECT * FROM personas WHERE idpersonas=?");
+// PERSONA
+$stmt = $pdo->prepare("SELECT * FROM personas WHERE idpersonas = ?");
 $stmt->execute([$id]);
 $persona = $stmt->fetch();
-if (!$persona) redirect('personas.php');
+if (!$persona) {
+    redirect('personas.php');
+}
 
-/* EMPRENDEDOR (si existe) */
-$stmt = $pdo->prepare("SELECT * FROM emprendedores WHERE personas_idpersonas=?");
+// EMPRENDEDOR (si existe)
+$stmt = $pdo->prepare("SELECT * FROM emprendedores WHERE personas_idpersonas = ?");
 $stmt->execute([$id]);
 $emprendedor = $stmt->fetch();
 
-/* CONTRATOS */
+// CONTRATOS
 $contratos = [];
 if ($emprendedor) {
     $stmt = $pdo->prepare("
         SELECT * FROM Contratos
-        WHERE emprendedores_idemprendedores=?
+        WHERE emprendedores_idemprendedores = ?
         ORDER BY fecha_inicio DESC
     ");
     $stmt->execute([$emprendedor['idemprendedores']]);
     $contratos = $stmt->fetchAll();
 }
 
-/* CREDITOS */
+// CREDITOS
 $creditos = [];
 if ($emprendedor) {
     $stmt = $pdo->prepare("
         SELECT * FROM creditos
-        WHERE emprendedores_idemprendedores=?
+        WHERE emprendedores_idemprendedores = ?
         ORDER BY fecha_inicio DESC
     ");
     $stmt->execute([$emprendedor['idemprendedores']]);
     $creditos = $stmt->fetchAll();
 }
 
-/* COBRANZAS */
+// COBRANZAS
 $cobranzas = [];
 if ($emprendedor) {
     $stmt = $pdo->prepare("
         SELECT c.*
         FROM cobranzas c
-        JOIN creditos cr ON c.creditos_idcreditos=cr.idcreditos
-        WHERE cr.emprendedores_idemprendedores=?
+        JOIN creditos cr ON c.creditos_idcreditos = cr.idcreditos
+        WHERE cr.emprendedores_idemprendedores = ?
         ORDER BY c.fecha_hora DESC
     ");
     $stmt->execute([$emprendedor['idemprendedores']]);
     $cobranzas = $stmt->fetchAll();
 }
 
-/* TALLERES */
+// TALLERES
 $talleres = [];
 if ($emprendedor) {
     $stmt = $pdo->prepare("
         SELECT t.nombre_taller, t.fecha_taller,
                i.asistio, i.calificacion
         FROM inscripciones_talleres i
-        JOIN talleres t ON i.talleres_idtalleres=t.idtalleres
-        WHERE i.emprendedores_idemprendedores=?
+        JOIN talleres t ON i.talleres_idtalleres = t.idtalleres
+        WHERE i.emprendedores_idemprendedores = ?
         ORDER BY t.fecha_taller DESC
     ");
     $stmt->execute([$emprendedor['idemprendedores']]);
     $talleres = $stmt->fetchAll();
 }
 
-include 'includes/header.php';
+include __DIR__ . '/includes/header.php';
 ?>
 
 <h4 class="mb-3">
-    <?= sanitize($persona['nombres'].' '.$persona['apellidos']) ?>
+    <?= htmlspecialchars($persona['nombres'] . ' ' . $persona['apellidos']) ?>
 </h4>
 
 <div class="row g-3">
@@ -91,7 +96,7 @@ include 'includes/header.php';
 <tbody>
 <?php foreach ($contratos as $c): ?>
 <tr>
-<td>#<?= $c['idContratos'] ?></td>
+<td>#<?= (int)$c['idContratos'] ?></td>
 <td><?= formatDate($c['fecha_inicio']) ?></td>
 <td><?= badgeEstado($c['estado']) ?></td>
 </tr>
@@ -115,7 +120,7 @@ include 'includes/header.php';
 <tbody>
 <?php foreach ($creditos as $cr): ?>
 <tr>
-<td>#<?= $cr['idcreditos'] ?></td>
+<td>#<?= (int)$cr['idcreditos'] ?></td>
 <td><?= formatMoney($cr['monto_inicial']) ?></td>
 <td><?= badgeEstado($cr['estado']) ?></td>
 </tr>
@@ -141,7 +146,7 @@ include 'includes/header.php';
 <tr>
 <td><?= formatDateTime($cb['fecha_hora']) ?></td>
 <td><?= formatMoney($cb['monto']) ?></td>
-<td><?= sanitize($cb['tipo_pago']) ?></td>
+<td><?= htmlspecialchars($cb['tipo_pago']) ?></td>
 </tr>
 <?php endforeach; ?>
 <?php if (!$cobranzas): ?>
@@ -163,7 +168,7 @@ include 'includes/header.php';
 <tbody>
 <?php foreach ($talleres as $t): ?>
 <tr>
-<td><?= sanitize($t['nombre_taller']) ?></td>
+<td><?= htmlspecialchars($t['nombre_taller']) ?></td>
 <td><?= formatDate($t['fecha_taller']) ?></td>
 <td><?= $t['asistio'] ? badgeEstado('1') : badgeEstado('0') ?></td>
 </tr>
@@ -179,4 +184,4 @@ include 'includes/header.php';
 
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . '/includes/footer.php'; ?>

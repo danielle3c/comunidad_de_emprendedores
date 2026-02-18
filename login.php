@@ -6,14 +6,11 @@
 <title>Corporación de Fomento La Granja</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ===================== VARIABLES ===================== */
 :root {
   --brand: rgb(67, 176, 42);
   --brand-dim: rgba(67, 176, 42, 0.18);
   --brand-glow: rgba(67, 176, 42, 0.35);
   --brand-dark: rgb(45, 130, 28);
-
-  /* Color picker dinámico */
   --pick-h: 107;
   --pick-s: 62%;
   --pick-l: 43%;
@@ -59,7 +56,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ===================== FONDO ANIMADO ===================== */
 .bg-canvas {
   position: fixed;
   inset: 0;
@@ -82,7 +78,6 @@ body {
     radial-gradient(ellipse 60% 70% at 85% 80%, rgba(67,176,42,0.08), transparent 55%);
 }
 
-/* Hexágonos decorativos */
 .hex-grid {
   position: absolute;
   inset: 0;
@@ -92,7 +87,6 @@ body {
 
 .hex-grid svg { width: 100%; height: 100%; }
 
-/* ===================== CONTROLES FLOTANTES ===================== */
 .controls {
   position: fixed;
   top: 1.2rem;
@@ -128,7 +122,6 @@ body {
 }
 .ctrl-btn svg { width: 14px; height: 14px; }
 
-/* Color picker oculto */
 #colorPicker {
   position: absolute;
   opacity: 0;
@@ -137,7 +130,6 @@ body {
   pointer-events: none;
 }
 
-/* ===================== BARRA DE BRILLO/OPACIDAD ===================== */
 .brightness-bar {
   position: fixed;
   left: 1.2rem;
@@ -194,7 +186,6 @@ body {
   transform: scale(1.2);
 }
 
-/* ===================== MAIN LAYOUT ===================== */
 .main {
   position: relative;
   z-index: 10;
@@ -206,7 +197,6 @@ body {
   min-height: 100vh;
 }
 
-/* ===================== CARD ===================== */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -234,7 +224,6 @@ body {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Logo + Header */
 .logo-wrap {
   display: flex;
   align-items: center;
@@ -278,7 +267,6 @@ body {
   transition: color .3s;
 }
 
-/* Título sección */
 .section-title {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.6rem;
@@ -293,7 +281,6 @@ body {
   margin-bottom: 1.8rem;
 }
 
-/* ===================== CAMPOS ===================== */
 .field {
   margin-bottom: 1.1rem;
 }
@@ -355,7 +342,6 @@ body {
 }
 .toggle-pass:hover { color: var(--brand-pick); }
 
-/* ===================== BOTÓN ===================== */
 .btn-primary {
   width: 100%;
   padding: .85rem;
@@ -386,33 +372,17 @@ body {
 .btn-primary:active { transform: scale(.98); }
 .btn-primary:hover { box-shadow: 0 6px 28px var(--brand-pick-glow); transform: translateY(-1px); }
 
-/* Exportar PDF */
-.btn-pdf {
-  width: 100%;
-  padding: .7rem;
-  background: transparent;
-  border: 1px solid var(--border);
+.error-message {
+  background: rgba(255, 80, 80, 0.15);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  color: #ff8a8a;
+  padding: 0.75rem 1rem;
   border-radius: 12px;
-  color: var(--text2);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .88rem;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-top: .7rem;
-  transition: all .2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-}
-.btn-pdf:hover {
-  border-color: var(--brand-pick);
-  color: var(--brand-pick);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
-/* ===================== IDIOMA ===================== */
 .lang-toggle {
   display: flex;
   gap: .4rem;
@@ -440,16 +410,16 @@ body {
   border-color: var(--brand-pick);
   color: var(--brand-pick);
 }
-
-/* ===================== ANIMACIÓN RIPPLE PDF ===================== */
-@keyframes ripple {
-  to { transform: scale(4); opacity: 0; }
-}
 </style>
 </head>
 <body>
 
-<!-- Fondo -->
+<?php
+session_start();
+$error = $_SESSION['flash_error'] ?? null;
+unset($_SESSION['flash_error']);
+?>
+
 <div class="bg-canvas">
   <div class="hex-grid">
     <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
@@ -463,7 +433,6 @@ body {
   </div>
 </div>
 
-<!-- Controles flotantes -->
 <div class="controls">
   <button class="ctrl-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar modo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -493,7 +462,6 @@ body {
   </button>
 </div>
 
-<!-- Barra vertical brillo -->
 <div class="brightness-bar">
   <label>Brillo</label>
   <input type="range" id="brightnessBar" min="30" max="150" value="100"
@@ -503,14 +471,11 @@ body {
   </svg>
 </div>
 
-<!-- Contenido principal -->
 <main class="main">
   <div class="card" id="mainCard">
 
-    <!-- Logo -->
     <div class="logo-wrap">
       <div class="logo-badge">
-        <!-- Logo hexágono corporación -->
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <polygon points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5" fill="none" stroke="currentColor" stroke-width="8"/>
           <polygon points="50,20 76,35 76,65 50,80 24,65 24,35" fill="currentColor" opacity=".3"/>
@@ -526,11 +491,20 @@ body {
     <h2 class="section-title" id="t-title">Iniciar sesión</h2>
     <p class="section-sub" id="t-sub">Ingrese sus credenciales para acceder al panel.</p>
 
-    <form id="loginForm" onsubmit="handleLogin(event)">
+    <?php if ($error): ?>
+    <div class="error-message"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
+    <form id="loginForm" method="POST" action="auth.php">
+      <?php
+      require_once __DIR__ . '/includes/csrf.php';
+      echo csrf_field();
+      ?>
+      
       <div class="field">
         <label id="t-user">Usuario</label>
         <div class="input-wrap">
-          <input type="text" id="username" placeholder="nombre.usuario" autocomplete="username">
+          <input type="text" name="username" id="username" placeholder="nombre.usuario" autocomplete="username" required>
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
@@ -540,7 +514,7 @@ body {
       <div class="field">
         <label id="t-pass">Contraseña</label>
         <div class="input-wrap">
-          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+          <input type="password" name="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
@@ -555,26 +529,16 @@ body {
       <button type="submit" class="btn-primary" id="t-btn">Acceder al sistema</button>
     </form>
 
-    <button class="btn-pdf" onclick="exportPDF()" id="t-pdf">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-      </svg>
-      Exportar como PDF
-    </button>
-
-    <!-- Selector de idioma -->
     <div class="lang-toggle">
-      <button class="lang-btn active" onclick="setLang('es', this)">🇨🇱 ES</button>
-      <button class="lang-btn" onclick="setLang('en', this)">🇺🇸 EN</button>
-      <button class="lang-btn" onclick="setLang('pt', this)">🇧🇷 PT</button>
+      <button class="lang-btn active" onclick="setLang('es', this)" type="button">🇨🇱 ES</button>
+      <button class="lang-btn" onclick="setLang('en', this)" type="button">🇺🇸 EN</button>
+      <button class="lang-btn" onclick="setLang('pt', this)" type="button">🇧🇷 PT</button>
     </div>
 
   </div>
 </main>
 
 <script>
-/* ========== THEME ========== */
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.dataset.theme === 'dark';
@@ -582,18 +546,15 @@ function toggleTheme() {
   document.getElementById('themeLabel').textContent = isDark ? 'Oscuro' : 'Claro';
 }
 
-/* ========== BRILLO ========== */
 function applyBrightness(val) {
   document.body.style.filter = `brightness(${val}%)`;
 }
 
-/* ========== COLOR PICKER ========== */
 function triggerColor() {
   document.getElementById('colorPicker').click();
 }
 
 function applyColor(hex) {
-  // Convertir hex a HSL
   const [h, s, l] = hexToHsl(hex);
   const root = document.documentElement;
   root.style.setProperty('--pick-h', h);
@@ -602,7 +563,6 @@ function applyColor(hex) {
   root.style.setProperty('--brand-pick', `hsl(${h},${s}%,${l}%)`);
   root.style.setProperty('--brand-pick-dim', `hsla(${h},${s}%,${l}%,0.18)`);
   root.style.setProperty('--brand-pick-glow', `hsla(${h},${s}%,${l}%,0.4)`);
-  // Actualizar patrón SVG de fondo
   document.querySelector('#hex polygon').setAttribute('stroke', hex);
 }
 
@@ -625,7 +585,6 @@ function hexToHsl(hex) {
   return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
 }
 
-/* ========== COPIAR FONDO ========== */
 function copyBackground() {
   const theme = document.documentElement.dataset.theme;
   const css = theme === 'dark'
@@ -636,7 +595,6 @@ function copyBackground() {
   });
 }
 
-/* ========== TOAST ========== */
 function showToast(msg) {
   const t = document.createElement('div');
   t.textContent = msg;
@@ -653,7 +611,6 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 2500);
 }
 
-/* ========== PASSWORD TOGGLE ========== */
 function togglePass() {
   const inp = document.getElementById('password');
   const icon = document.getElementById('eyeIcon');
@@ -666,31 +623,6 @@ function togglePass() {
   }
 }
 
-/* ========== LOGIN ========== */
-function handleLogin(e) {
-  e.preventDefault();
-  const btn = document.querySelector('.btn-primary');
-  btn.textContent = '...';
-  btn.style.opacity = '.7';
-  setTimeout(() => {
-    btn.style.opacity = '1';
-    btn.textContent = translations[currentLang]['t-btn'];
-    showToast('✓ Sesión iniciada correctamente');
-  }, 1200);
-}
-
-/* ========== EXPORTAR PDF ========== */
-function exportPDF() {
-  const btn = document.querySelector('.btn-pdf');
-  btn.style.opacity = '.6';
-  showToast('⏳ Generando PDF...');
-  setTimeout(() => {
-    btn.style.opacity = '1';
-    window.print();
-  }, 600);
-}
-
-/* ========== IDIOMA ========== */
 let currentLang = 'es';
 const translations = {
   es: {
@@ -700,8 +632,6 @@ const translations = {
     't-user':   'Usuario',
     't-pass':   'Contraseña',
     't-btn':    'Acceder al sistema',
-    't-pdf':    'Exportar como PDF',
-    'themeLabel': document.documentElement.dataset.theme === 'dark' ? 'Claro' : 'Oscuro',
   },
   en: {
     'corp-sub': 'Management system · 2025',
@@ -710,7 +640,6 @@ const translations = {
     't-user':   'Username',
     't-pass':   'Password',
     't-btn':    'Access system',
-    't-pdf':    'Export as PDF',
   },
   pt: {
     'corp-sub': 'Sistema de gestão · 2025',
@@ -719,7 +648,6 @@ const translations = {
     't-user':   'Usuário',
     't-pass':   'Senha',
     't-btn':    'Acessar sistema',
-    't-pdf':    'Exportar como PDF',
   },
 };
 
@@ -732,16 +660,14 @@ function setLang(lang, btn) {
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   }
-  document.getElementById('password').placeholder = lang === 'en' ? '••••••••' : lang === 'pt' ? '••••••••' : '••••••••';
+  document.getElementById('password').placeholder = '••••••••';
   document.getElementById('username').placeholder = lang === 'en' ? 'user.name' : lang === 'pt' ? 'nome.usuario' : 'nombre.usuario';
 }
 
-/* ========== ANIMACIÓN ENTRADA ========== */
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.card').style.animationPlayState = 'running';
 });
 
-/* Print styles */
 const printStyle = document.createElement('style');
 printStyle.textContent = `
 @media print {

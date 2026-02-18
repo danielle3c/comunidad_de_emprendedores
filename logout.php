@@ -5,7 +5,6 @@ secure_session_start();
 session_unset();
 session_destroy();
 
-// Cookie de sesión expirada
 if (ini_get('session.use_cookies')) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,

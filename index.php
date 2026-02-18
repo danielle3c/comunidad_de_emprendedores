@@ -24,19 +24,18 @@ try {
     $stats['contratos']     = (int)$pdo->query("SELECT COUNT(*) FROM contratos")->fetchColumn();
     $stats['creditos']      = (int)$pdo->query("SELECT COUNT(*) FROM creditos")->fetchColumn();
     $stats['carritos']      = (int)$pdo->query("SELECT COUNT(*) FROM carritos")->fetchColumn();
-    $stats['recaudacion']   = (int)$pdo->query("SELECT IFNULL(SUM(monto),0) FROM cobranzas")->fetchColumn();
+    $stats['recaudacion']   = (float)$pdo->query("SELECT IFNULL(SUM(monto), 0) FROM cobranzas")->fetchColumn();
 } catch (Exception $e) {
-    // Evita que el sistema se rompa
+    error_log("Error en index.php (stats): " . $e->getMessage());
 }
 
 $ultimosPagos = [];
 $proximosTalleres = [];
 
 try {
-    // columna correcta es fecha_hora (no fecha_pago)
     $ultimosPagos = $pdo->query("
         SELECT c.monto, c.fecha_hora,
-               CONCAT(p.nombres,' ',p.apellidos) AS nombre_persona
+               CONCAT(p.nombres, ' ', p.apellidos) AS nombre_persona
         FROM cobranzas c
         JOIN creditos cr ON c.creditos_idcreditos = cr.idcreditos
         JOIN emprendedores e ON cr.emprendedores_idemprendedores = e.idemprendedores
@@ -45,17 +44,18 @@ try {
         LIMIT 5
     ")->fetchAll(PDO::FETCH_ASSOC);
 
-    // columnas correctas son nombre_taller y fecha_taller
     $proximosTalleres = $pdo->query("
         SELECT nombre_taller, fecha_taller, lugar
         FROM talleres
         WHERE fecha_taller >= CURDATE()
-          AND estado NOT IN ('Finalizado','Cancelado')
+          AND estado NOT IN ('Finalizado', 'Cancelado')
         ORDER BY fecha_taller ASC
         LIMIT 5
     ")->fetchAll(PDO::FETCH_ASSOC);
 
-} catch (Exception $e) {}
+} catch (Exception $e) {
+    error_log("Error en index.php (pagos/talleres): " . $e->getMessage());
+}
 
 ob_start();
 ?>
@@ -68,7 +68,7 @@ $cards = [
     ['label'=>'Contratos','value'=>$stats['contratos'], 'icon'=>'bi-file-earmark-text', 'href'=>'contratos.php'],
     ['label'=>'Créditos','value'=>$stats['creditos'], 'icon'=>'bi-credit-card', 'href'=>'creditos.php'],
     ['label'=>'Carritos','value'=>$stats['carritos'], 'icon'=>'bi-cart3', 'href'=>'carritos.php'],
-    ['label'=>'Recaudación','value'=>'$'.number_format($stats['recaudacion'],0,',','.'), 'icon'=>'bi-cash-coin', 'href'=>'cobranzas.php'],
+    ['label'=>'Recaudación','value'=>formatMoney($stats['recaudacion']), 'icon'=>'bi-cash-coin', 'href'=>'cobranzas.php'],
 ];
 
 foreach ($cards as $c):
@@ -107,7 +107,7 @@ foreach ($cards as $c):
                         <?php foreach ($ultimosPagos as $p): ?>
                         <tr>
                             <td><?= htmlspecialchars($p['nombre_persona'] ?? '-') ?></td>
-                            <td class="fw-semibold text-success">$<?= number_format($p['monto'],0,',','.') ?></td>
+                            <td class="fw-semibold text-success"><?= formatMoney($p['monto']) ?></td>
                             <td class="text-muted small"><?= date('d/m/Y H:i', strtotime($p['fecha_hora'])) ?></td>
                         </tr>
                         <?php endforeach; ?>
@@ -152,3 +152,4 @@ foreach ($cards as $c):
 <?php
 $content = ob_get_clean();
 include __DIR__ . '/includes/layout.php';
+?>
