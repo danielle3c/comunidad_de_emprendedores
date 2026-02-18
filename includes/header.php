@@ -15,16 +15,7 @@ if (!defined('FROM_LAYOUT')):
 </head>
 <body>
 
-<div class="bg-canvas">
-  <svg class="hex-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
-    <defs>
-      <pattern id="hexPat" x="0" y="0" width="30" height="26" patternUnits="userSpaceOnUse">
-        <polygon points="15,1 28,8 28,22 15,29 2,22 2,8" fill="none" stroke="rgb(67,176,42)" stroke-width=".7" id="hexStroke"/>
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#hexPat)"/>
-  </svg>
-</div>
+
 
 <div class="sys-controls">
   <button class="sys-btn" onclick="sysToggleTheme()" id="sysThemeBtn" title="Cambiar tema">

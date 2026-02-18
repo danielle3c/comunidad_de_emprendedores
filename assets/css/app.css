@@ -181,7 +181,160 @@ body {
     color: var(--brand-pick);
 }
 
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    min-height: 100vh;
+    padding: 0;
+}
 
+.topbar {
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.content-area {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+}
+
+/* ===== BOTONES ===== */
+.btn-primary {
+    background-color: var(--brand-pick);
+    border-color: var(--brand-pick);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2d8a1a;
+    border-color: #2d8a1a;
+}
+
+.btn-outline-primary {
+    border-color: var(--brand-pick);
+    color: var(--brand-pick);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--brand-pick);
+    color: white;
+}
+
+
+
+/* ===== TABLAS ===== */
+.table {
+    color: var(--text-primary);
+}
+
+.table thead th {
+    border-bottom-color: var(--border-color);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    border-bottom-color: var(--border-color);
+    vertical-align: middle;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* ===== TOAST GLOBAL ===== */
+.sys-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sys-toast.show {
+    opacity: 1;
+}
+
+/* ===== CONTROLES FLOTANTES ===== */
+.sys-controls {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sys-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+}
+
+.sys-btn:hover {
+    border-color: var(--brand-pick);
+    color: var(--brand-pick);
+    transform: translateY(-1px);
+}
+
+.lang-select {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+}
 
 /* ===== BARRA DE BRILLO ===== */
 .brightness-rail {
