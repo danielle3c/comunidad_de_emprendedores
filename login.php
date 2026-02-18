@@ -1,3 +1,9 @@
+<?php
+// INICIAR SESIÓN AL PRINCIPIO - ANTES DE CUALQUIER HTML
+session_start();
+$error = $_SESSION['flash_error'] ?? null;
+unset($_SESSION['flash_error']);
+?>
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
@@ -6,6 +12,7 @@
 <title>Corporación de Fomento La Granja</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+/* (Todo el CSS permanece igual) */
 :root {
   --brand: rgb(67, 176, 42);
   --brand-dim: rgba(67, 176, 42, 0.18);
@@ -413,12 +420,6 @@ body {
 </style>
 </head>
 <body>
-
-<?php
-session_start();
-$error = $_SESSION['flash_error'] ?? null;
-unset($_SESSION['flash_error']);
-?>
 
 <div class="bg-canvas">
   <div class="hex-grid">
