@@ -182,44 +182,6 @@ body {
 }
 
 
-/* ===== CARDS ===== */
-.card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1rem;
-}
-
-.card-header {
-    background-color: transparent;
-    border-bottom: 1px solid var(--border-color);
-    padding: 1rem 1.25rem;
-    font-weight: 600;
-}
-
-/* ===== BOTONES ===== */
-.btn-primary {
-    background-color: var(--brand-pick);
-    border-color: var(--brand-pick);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #2d8a1a;
-    border-color: #2d8a1a;
-}
-
-.btn-outline-primary {
-    border-color: var(--brand-pick);
-    color: var(--brand-pick);
-}
-
-.btn-outline-primary:hover {
-    background-color: var(--brand-pick);
-    color: white;
-}
-
 
 
 /* ===== TABLAS ===== */
