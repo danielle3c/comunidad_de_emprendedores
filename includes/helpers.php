@@ -1,11 +1,9 @@
 <?php
-// ============================================
-// Funciones auxiliares compartidas
-// ============================================
+// includes/helpers.php
 
 require_once __DIR__ . '/../config/database.php';
 
-// Iniciar sesión una sola vez (evita el Notice)
+// Iniciar sesión una sola vez (via security.php si está disponible)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,7 +13,7 @@ function sanitize(string $value): string {
 }
 
 function redirect(string $url): void {
-    header("Location: $url");
+    header('Location: ' . $url);
     exit;
 }
 
@@ -33,12 +31,12 @@ function getFlash(): ?array {
 }
 
 function formatDate(?string $date): string {
-    if (!$date) return '-';
+    if (!$date || $date === '0000-00-00') return '-';
     return date('d/m/Y', strtotime($date));
 }
 
 function formatDateTime(?string $dt): string {
-    if (!$dt) return '-';
+    if (!$dt || $dt === '0000-00-00 00:00:00') return '-';
     return date('d/m/Y H:i', strtotime($dt));
 }
 
@@ -47,52 +45,73 @@ function formatMoney($amount): string {
     return '$' . number_format((float)$amount, 0, ',', '.');
 }
 
-function badgeEstado(string $estado, string $tipo = 'general'): string {
+function badgeEstado(string $estado): string {
     $map = [
-        'Activo'       => 'success',
-        'Finalizado'   => 'secondary',
-        'Cancelado'    => 'danger',
-        'Pagado'       => 'info',
-        'Vencido'      => 'warning',
-        'Programado'   => 'primary',
-        'En Curso'     => 'warning',
-        'Planificada'  => 'primary',
-        'En Ejecución' => 'warning',
-        'Finalizada'   => 'secondary',
-        'Confirmada'   => 'success',
-        'Pendiente'    => 'warning',
-        '1'            => 'success',
-        '0'            => 'danger',
+        'Activo'          => ['success',   'Activo'],
+        'Finalizado'      => ['secondary', 'Finalizado'],
+        'Cancelado'       => ['danger',    'Cancelado'],
+        'Cancelada'       => ['danger',    'Cancelada'],
+        'Pagado'          => ['info',      'Pagado'],
+        'Vencido'         => ['warning',   'Vencido'],
+        'Programado'      => ['primary',   'Programado'],
+        'En Curso'        => ['warning',   'En Curso'],
+        'Planificada'     => ['primary',   'Planificada'],
+        'En Ejecución'    => ['warning',   'En Ejecución'],
+        'Finalizada'      => ['secondary', 'Finalizada'],
+        'Confirmada'      => ['success',   'Confirmada'],
+        'Pendiente'       => ['warning',   'Pendiente'],
+        '1'               => ['success',   'Activo'],
+        '0'               => ['danger',    'Inactivo'],
     ];
-    $color = $map[$estado] ?? 'secondary';
-    $label = ($estado === '1') ? 'Activo' : (($estado === '0') ? 'Inactivo' : $estado);
-    return "<span class=\"badge bg-$color\">$label</span>";
+    [$color, $label] = $map[$estado] ?? ['secondary', htmlspecialchars($estado, ENT_QUOTES, 'UTF-8')];
+    return "<span class=\"badge bg-$color\">" . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . "</span>";
 }
 
 function getPaginationData(int $total, int $page, int $perPage = 15): array {
-    $totalPages = (int) ceil($total / $perPage);
-    $totalPages = max(1, $totalPages);
-    $page = max(1, min($page, $totalPages));
-    $offset = ($page - 1) * $perPage;
-    return ['total' => $total, 'page' => $page, 'perPage' => $perPage, 'totalPages' => $totalPages, 'offset' => $offset];
+    $totalPages = max(1, (int)ceil($total / $perPage));
+    $page       = max(1, min($page, $totalPages));
+    $offset     = ($page - 1) * $perPage;
+    return [
+        'total'      => $total,
+        'page'       => $page,
+        'perPage'    => $perPage,
+        'totalPages' => $totalPages,
+        'offset'     => $offset,
+    ];
 }
 
 function renderPagination(array $pag, string $baseUrl): string {
     if ($pag['totalPages'] <= 1) return '';
-    $html = '<nav><ul class="pagination justify-content-center">';
-    $prev = $pag['page'] - 1;
-    $next = $pag['page'] + 1;
+    $p     = $pag['page'];
+    $total = $pag['totalPages'];
 
-    $disabled = $pag['page'] <= 1 ? 'disabled' : '';
-    $html .= "<li class=\"page-item $disabled\"><a class=\"page-link\" href=\"{$baseUrl}&page=$prev\">‹</a></li>";
+    $html = '<nav aria-label="Paginación"><ul class="pagination justify-content-center mb-0">';
 
-    for ($i = 1; $i <= $pag['totalPages']; $i++) {
-        $active = ($i === $pag['page']) ? 'active' : '';
-        $html .= "<li class=\"page-item $active\"><a class=\"page-link\" href=\"{$baseUrl}&page=$i\">$i</a></li>";
+    // Anterior
+    $dis = $p <= 1 ? ' disabled' : '';
+    $html .= "<li class=\"page-item$dis\"><a class=\"page-link\" href=\"{$baseUrl}&page=" . ($p - 1) . "\">‹</a></li>";
+
+    // Páginas (máximo 7 visibles con elipsis)
+    $range = [];
+    for ($i = 1; $i <= $total; $i++) {
+        if ($i === 1 || $i === $total || abs($i - $p) <= 2) {
+            $range[] = $i;
+        }
+    }
+    $prev = null;
+    foreach ($range as $i) {
+        if ($prev !== null && $i - $prev > 1) {
+            $html .= '<li class="page-item disabled"><span class="page-link">…</span></li>';
+        }
+        $active = $i === $p ? ' active' : '';
+        $html .= "<li class=\"page-item$active\"><a class=\"page-link\" href=\"{$baseUrl}&page=$i\">$i</a></li>";
+        $prev = $i;
     }
 
-    $disabled2 = $pag['page'] >= $pag['totalPages'] ? 'disabled' : '';
-    $html .= "<li class=\"page-item $disabled2\"><a class=\"page-link\" href=\"{$baseUrl}&page=$next\">›</a></li>";
+    // Siguiente
+    $dis = $p >= $total ? ' disabled' : '';
+    $html .= "<li class=\"page-item$dis\"><a class=\"page-link\" href=\"{$baseUrl}&page=" . ($p + 1) . "\">›</a></li>";
+
     $html .= '</ul></nav>';
     return $html;
 }

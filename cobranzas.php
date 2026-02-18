@@ -1,4 +1,5 @@
 <?php
+require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 $pageTitle = 'Cobranzas';
 $pdo = getConnection();
@@ -59,7 +60,7 @@ if ($filtroTipo) { $conditions[] = "c.tipo_pago=:tp"; $params[':tp'] = $filtroTi
 $where = $conditions ? "WHERE ".implode(' AND ',$conditions) : '';
 $base = "FROM cobranzas c JOIN creditos cr ON c.creditos_idcreditos=cr.idcreditos JOIN emprendedores e ON cr.emprendedores_idemprendedores=e.idemprendedores JOIN personas p ON e.personas_idpersonas=p.idpersonas $where";
 $tc = $pdo->prepare("SELECT COUNT(*) $base"); $tc->execute($params); $total = (int)$tc->fetchColumn();
-$totalMonto = $pdo->prepare("SELECT COALESCE(SUM(c.monto),0) $base"); $totalMonto->execute($params); $totalMonto = (float)$totalMonto->fetchColumn();
+$stmtTotal = $pdo->prepare("SELECT COALESCE(SUM(c.monto),0) $base"); $stmtTotal->execute($params); $totalMonto = (float)$stmtTotal->fetchColumn();
 $pag = getPaginationData($total,$page,$perPage);
 $stmt = $pdo->prepare("SELECT c.*, CONCAT(p.nombres,' ',p.apellidos) AS nombre_persona $base ORDER BY c.fecha_hora DESC LIMIT :limit OFFSET :offset");
 foreach ($params as $k=>$v) $stmt->bindValue($k,$v);

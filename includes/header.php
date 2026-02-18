@@ -1,201 +1,134 @@
 <?php
-// Asegura sesión antes de cualquier salida
-if (session_status() === PHP_SESSION_NONE) session_start();
+// includes/header.php
+if (!defined('FROM_LAYOUT')):
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= $pageTitle ?? 'Comunidad de Emprendedores' ?></title>
-
+  <title><?= htmlspecialchars($pageTitle ?? 'Corporación de Fomento La Granja', ENT_QUOTES, 'UTF-8') ?></title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<link href="assets/css/app.css" rel="stylesheet">
-
-
-
-    body{ background:var(--bg); font-size:.92rem; color:var(--text); }
-
-    /* Sidebar */
-    .sidebar{
-      min-height:100vh; width:252px; position:fixed; top:0; left:0; z-index:100;
-      background: linear-gradient(180deg, var(--sidebar), var(--sidebar2));
-      border-right:1px solid rgba(255,255,255,.06);
-      overflow-y:auto;
-    }
-    .sidebar .brand{
-      padding:1.2rem 1rem;
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    .sidebar .brand .title{ color:#fff; font-weight:800; letter-spacing:-.02em; }
-    .sidebar .brand .sub{ color:rgba(255,255,255,.55); font-size:.78rem; }
-
-    .sidebar .nav-section{
-      font-size:.72rem; text-transform:uppercase; letter-spacing:.12em;
-      color:rgba(255,255,255,.35); padding:1rem 1rem .35rem;
-    }
-    .sidebar .nav-link{
-      color:rgba(255,255,255,.70);
-      padding:.55rem .9rem;
-      border-radius:12px;
-      margin:3px 10px;
-      font-size:.9rem;
-      display:flex; align-items:center; gap:.55rem;
-    }
-    .sidebar .nav-link:hover{ background:rgba(255,255,255,.08); color:#fff; }
-    .sidebar .nav-link.active{ background:rgba(255,255,255,.14); color:#fff; }
-
-    /* Main */
-    .main-content{ margin-left:252px; min-height:100vh; }
-    .topbar{
-      position:sticky; top:0; z-index:90;
-      background:rgba(255,255,255,.92);
-      backdrop-filter: blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:.75rem 1.25rem;
-    }
-    .content-area{ padding: 1.25rem; }
-
-    /* Cards / tables */
-    .card{ border:1px solid var(--border); border-radius:var(--radius); box-shadow:none; }
-    .card-soft{ background:var(--card); box-shadow:var(--shadow-sm); }
-    .card-hover{ transition: transform .15s ease, box-shadow .15s ease; }
-    .card-hover:hover{ transform: translateY(-2px); box-shadow:var(--shadow); }
-
-    .table thead th{
-      font-size:.78rem; text-transform:uppercase; letter-spacing:.06em;
-      color:#64748b; font-weight:800; background:#fff;
-      position:sticky; top:0; z-index:1;
-      border-bottom:1px solid var(--border) !important;
-    }
-    .table td{ border-top:1px solid var(--border); vertical-align:middle; }
-    .table-wrap{ max-height:360px; overflow:auto; border-radius:var(--radius); }
-
-    .btn, .form-control, .input-group-text{ border-radius:12px; }
-    .form-control, .input-group-text{ border:1px solid var(--border); }
-    .form-control:focus{
-      border-color: rgba(13,110,253,.35);
-      box-shadow: 0 0 0 .25rem rgba(13,110,253,.10);
-    }
-
-    .badge{ border-radius:999px; padding:.45em .75em; font-weight:800; }
-    .kpi-icon{ width:52px; height:52px; }
-
-    /* Responsive */
-    @media(max-width: 992px){
-      .sidebar{ position:relative; width:100%; min-height:auto; }
-      .main-content{ margin-left:0; }
-      .topbar{ position:relative; }
-    }
-  </style>
+  <link href="assets/css/app.css" rel="stylesheet">
 </head>
-
 <body>
-<div class="d-flex">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar d-flex flex-column">
-    <div class="brand">
-      <div class="title"><i class="bi bi-people-fill me-2"></i>Emprendedores</div>
-<div style="color:#fff; font-size:12px; opacity:.7; padding-top:6px;">
-  HEADER OK - TARJETAS
+<!-- Fondo animado -->
+<div class="bg-canvas">
+  <svg class="hex-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <pattern id="hexPat" x="0" y="0" width="30" height="26" patternUnits="userSpaceOnUse">
+        <polygon points="15,1 28,8 28,22 15,29 2,22 2,8" fill="none" stroke="rgb(67,176,42)" stroke-width=".7" id="hexStroke"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#hexPat)"/>
+  </svg>
 </div>
-    </div>
 
-    <nav class="flex-grow-1 py-2">
-      <div class="nav-section">Principal</div>
-      <a href="index.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='index.php')?'active':'' ?>">
-        <i class="bi bi-speedometer2"></i> Dashboard
-      </a>
+<!-- ===== CONTROLES FLOTANTES ===== -->
+<div class="sys-controls">
 
-      <div class="nav-section">Personas</div>
-      <a href="personas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='personas.php')?'active':'' ?>">
-        <i class="bi bi-person"></i> Personas
-      </a>
-      <a href="emprendedores.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='emprendedores.php')?'active':'' ?>">
-        <i class="bi bi-briefcase"></i> Emprendedores
-      </a>
+  <!-- Tema oscuro/claro -->
+  <button class="sys-btn" onclick="sysToggleTheme()" id="sysThemeBtn" title="Cambiar tema">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+    <span id="sysThemeLabel">Claro</span>
+  </button>
 
-      <div class="nav-section">Finanzas</div>
-      <a href="contratos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='contratos.php')?'active':'' ?>">
-        <i class="bi bi-file-earmark-text"></i> Contratos
-      </a>
-      <a href="creditos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='creditos.php')?'active':'' ?>">
-        <i class="bi bi-credit-card"></i> Créditos
-      </a>
-      <a href="cobranzas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='cobranzas.php')?'active':'' ?>">
-        <i class="bi bi-cash-coin"></i> Cobranzas
-      </a>
+  <!-- Color picker -->
+  <button class="sys-btn" onclick="document.getElementById('colorPickerGlobal').click()" title="Cambiar color">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+    </svg>
+    Color
+    <input type="color" id="colorPickerGlobal" value="#43b02a" oninput="sysApplyColor(this.value)"
+           style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
+  </button>
 
-      <div class="nav-section">Actividades</div>
-      <a href="talleres.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='talleres.php')?'active':'' ?>">
-        <i class="bi bi-book"></i> Talleres
-      </a>
-      <a href="inscripciones_talleres.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='inscripciones_talleres.php')?'active':'' ?>">
-        <i class="bi bi-journal-check"></i> Inscripciones
-      </a>
-      <a href="jornadas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='jornadas.php')?'active':'' ?>">
-        <i class="bi bi-calendar-event"></i> Jornadas
-      </a>
-      <a href="carritos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='carritos.php')?'active':'' ?>">
-        <i class="bi bi-cart3"></i> Carritos
-      </a>
+  <!-- Copiar fondo -->
+  <button class="sys-btn" onclick="sysCopyBg()" title="Copiar CSS del fondo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="9" y="9" width="13" height="13" rx="2"/>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+    Fondo
+  </button>
 
-      <div class="nav-section">Otros</div>
-      <a href="encuestas.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='encuestas.php')?'active':'' ?>">
-        <i class="bi bi-clipboard-data"></i> Encuestas
-      </a>
-      <a href="documentos.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='documentos.php')?'active':'' ?>">
-        <i class="bi bi-folder"></i> Documentos
-      </a>
-      <a href="tarjetas_presentacion.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='tarjetas_presentacion.php')?'active':'' ?>">
-  <i class="bi bi-person-vcard"></i> Tarjetas de Presentación
-</a>
+  <!-- Exportar PDF -->
+  <button class="sys-btn" onclick="sysExportPDF()" title="Exportar como PDF">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
+    PDF
+  </button>
 
+  <!-- Idioma -->
+  <select class="lang-select" onchange="sysSetLang(this.value)" id="sysLangSelect" title="Idioma">
+    <option value="es">🇨🇱 ES</option>
+    <option value="en">🇺🇸 EN</option>
+    <option value="pt">🇧🇷 PT</option>
+  </select>
 
+</div>
 
-      <a href="usuarios.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='usuarios.php')?'active':'' ?>">
-        <i class="bi bi-people"></i> Usuarios
-      </a>
-      <a href="auditoria.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='auditoria.php')?'active':'' ?>">
-        <i class="bi bi-shield-check"></i> Auditoría
-      </a>
-      <a href="configuraciones.php" class="nav-link <?= (basename($_SERVER['PHP_SELF'])=='configuraciones.php')?'active':'' ?>">
-        <i class="bi bi-gear"></i> Configuración
-      </a>
-    </nav>
-  </div>
+<!-- ===== BARRA DE BRILLO ===== -->
+<div class="brightness-rail" title="Ajustar brillo">
+  <span class="rail-label">Brillo</span>
+  <input type="range" id="sysBrightnessBar" min="40" max="140" value="100"
+         oninput="document.body.style.filter='brightness('+this.value+'%)'">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text2)">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+  </svg>
+</div>
 
-  <!-- MAIN -->
+<!-- Toast global -->
+<div class="sys-toast" id="sysToast"></div>
+
+<div class="d-flex">
+  <?php include __DIR__ . '/sidebar.php'; ?>
   <div class="main-content flex-grow-1">
+<?php endif; // FROM_LAYOUT ?>
 
-    <!-- TOPBAR con buscador -->
+    <!-- TOPBAR -->
     <div class="topbar">
-      <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <h6 class="mb-0 fw-bold"><?= $pageTitle ?? '' ?></h6>
-          <span class="text-muted" style="font-size:.82rem"><?= date('d/m/Y H:i') ?></span>
-        </div>
+      <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <h6 class="mb-0 fw-bold" style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:.03em">
+          <?= htmlspecialchars($pageTitle ?? '', ENT_QUOTES, 'UTF-8') ?>
+        </h6>
 
-        <div class="position-relative" style="max-width:560px; width:100%;">
-          <div class="input-group">
-            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <!-- Búsqueda inteligente -->
+        <div class="position-relative" style="max-width:520px;width:100%">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
             <input id="smartSearch" type="text" class="form-control"
-                   placeholder="Buscar persona por RUT o nombre..."
-                   autocomplete="off">
+                   placeholder="Buscar persona por RUT o nombre..." autocomplete="off">
           </div>
-
-          <div id="smartResults" class="list-group position-absolute w-100 mt-2 shadow-sm"
-               style="z-index:9999; display:none; max-height:340px; overflow:auto;"></div>
+          <div id="smartResults" class="list-group position-absolute w-100 mt-1 shadow"
+               style="z-index:9999;display:none;max-height:320px;overflow:auto"></div>
         </div>
+
+        <span class="text-muted" style="font-size:.78rem;white-space:nowrap">
+          <?= date('d/m/Y H:i') ?>
+        </span>
       </div>
     </div>
 
     <div class="content-area">
-
-      <?php if ($flash = getFlash()): ?>
-        <div class="alert alert-<?= $flash['type'] === 'success' ? 'success' : 'danger' ?> border-0 shadow-sm rounded-4">
-          <?= htmlspecialchars($flash['message']) ?>
+      <?php if (function_exists('getFlash') && ($flash = getFlash())): ?>
+        <div class="alert alert-<?= $flash['type'] === 'success' ? 'success' : 'danger' ?> d-flex align-items-center gap-2 mb-3">
+          <i class="bi <?= $flash['type'] === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle' ?>"></i>
+          <?= htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8') ?>
         </div>
       <?php endif; ?>

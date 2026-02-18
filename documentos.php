@@ -1,19 +1,19 @@
 <?php
+require_once __DIR__ . '/includes/auth_guard.php';
 require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Documentos';
 $pdo = getConnection();
 
-if (session_status() === PHP_SESSION_NONE) session_start();
 
 $action = $_GET['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
 
-// ✅ Usuario logueado (CAMBIAR si tu sesión usa otro nombre)
-$usuario_id = (int)($_SESSION['idUsuarios'] ?? 0);
+// Usuario logueado — la sesión se guarda como $_SESSION['user']['id'] en auth.php
+$usuario_id = (int)($_SESSION['user']['id'] ?? 0);
 
 if ($usuario_id <= 0) {
     setFlash('error', 'Debe iniciar sesión para subir documentos.');
-    redirect('login.php'); // ajusta si tu login tiene otro nombre
+    redirect('login.php');
 }
 
 // Carpeta uploads

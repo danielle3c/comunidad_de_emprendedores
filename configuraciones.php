@@ -1,4 +1,5 @@
 <?php
+require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 $pageTitle = 'Configuración del Sistema';
 $pdo = getConnection();
@@ -15,16 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Logo upload
     if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg','jpeg','png','svg','gif'])) {
+        $allowedMimes = ['image/jpeg','image/png','image/svg+xml','image/gif'];
+        $fileMime = mime_content_type($_FILES['logo']['tmp_name']);
+        if (in_array($ext, ['jpg','jpeg','png','svg','gif']) && in_array($fileMime, $allowedMimes)) {
             $dir = __DIR__ . '/uploads/';
             if (!is_dir($dir)) @mkdir($dir, 0755, true);
-            $nombre = 'logo_' . time() . '.' . $ext;
+            $nombre = 'logo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
             if (move_uploaded_file($_FILES['logo']['tmp_name'], $dir . $nombre)) {
                 $data['logo'] = 'uploads/' . $nombre;
             }
+        } else {
+            setFlash('error', 'Tipo de archivo no permitido para el logo.');
         }
     } else {
-        $data['logo'] = sanitize($_POST['logo_actual'] ?? '');
+        // Restringir para que solo acepte rutas que empiecen con uploads/
+        $logoActual = sanitize($_POST['logo_actual'] ?? '');
+        $data['logo'] = str_starts_with($logoActual, 'uploads/') ? $logoActual : '';
     }
 
     try {
@@ -54,7 +61,7 @@ include 'includes/header.php';
     <div class="card-header bg-white border-0 fw-semibold">Configuración General del Sistema</div>
     <div class="card-body">
     <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="logo_actual" value="<?= $config['logo'] ?? '' ?>">
+        <input type="hidden" name="logo_actual" value="<?= htmlspecialchars($config['logo'] ?? '') ?>">
 
         <div class="row g-3">
             <div class="col-md-8">

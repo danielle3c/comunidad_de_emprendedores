@@ -1,4 +1,5 @@
 <?php
+require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 $pdo = getConnection();
 

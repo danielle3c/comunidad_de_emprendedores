@@ -1,4 +1,5 @@
 <?php
+require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 $pageTitle = 'Encuestas 2026';
 $pdo = getConnection();

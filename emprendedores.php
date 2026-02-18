@@ -1,4 +1,5 @@
 <?php
+require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 $pageTitle = 'Emprendedores';
 $pdo = getConnection();
@@ -59,7 +60,6 @@ $perPage = 15;
 $where = $search ? "WHERE p.nombres LIKE :s OR p.apellidos LIKE :s OR e.rubro LIKE :s OR p.rut LIKE :s" : "";
 $params = $search ? [':s' => "%$search%"] : [];
 $countSql = "SELECT COUNT(*) FROM emprendedores e JOIN personas p ON e.personas_idpersonas=p.idpersonas $where";
-$total = (int)$pdo->prepare($countSql)->execute($params) ? $pdo->prepare($countSql) : null;
 $tc = $pdo->prepare($countSql);
 $tc->execute($params);
 $total = (int)$tc->fetchColumn();

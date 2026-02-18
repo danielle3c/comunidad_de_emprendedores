@@ -1,9 +1,10 @@
 <?php
+require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 $pageTitle = 'Auditoría';
 $pdo = getConnection();
 
-$action = $_GET['action'] ?? 'list';
+$action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 $id     = (int)($_GET['id'] ?? 0);
 
 if ($action === 'delete' && $id) {
@@ -12,7 +13,7 @@ if ($action === 'delete' && $id) {
     redirect('auditoria.php');
 }
 
-if ($action === 'clear') {
+if ($action === 'clear' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     try { $pdo->exec("DELETE FROM auditoria"); setFlash('success','Auditoría limpiada.'); }
     catch (PDOException $e) { setFlash('error','Error: '.$e->getMessage()); }
     redirect('auditoria.php');
@@ -56,7 +57,10 @@ include 'includes/header.php';
                 </select>
                 <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
             </form>
-            <a href="auditoria.php?action=clear" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Limpiar toda la auditoría?')"><i class="bi bi-trash"></i> Limpiar</a>
+            <form method="POST" action="auditoria.php" class="d-inline" onsubmit="return confirm('¿Limpiar toda la auditoría? Esta acción no se puede deshacer.')">
+                <input type="hidden" name="action" value="clear">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Limpiar todo</button>
+            </form>
         </div>
     </div>
     <div class="card-body p-0">
