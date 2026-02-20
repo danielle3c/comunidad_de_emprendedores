@@ -5,16 +5,13 @@ require_once __DIR__ . '/includes/helpers.php';
 
 secure_session_start();
 
-if (!csrf_verify()) {
-    $_SESSION['flash_error'] = 'Error de validación de sesión. Intente de nuevo.';
-    header('Location: login.php');
-    exit;
-}
+// Verificar token CSRF
+csrf_verify();
 
 $pdo = getConnection();
 
-$username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING) ?? '');
-$password = (string) filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING) ?? '';
+$username = trim($_POST['username'] ?? '');
+$password = (string)($_POST['password'] ?? '');
 
 if ($username === '' || $password === '') {
     $_SESSION['flash_error'] = 'Debe ingresar usuario y contraseña.';
@@ -29,24 +26,19 @@ $stmt = $pdo->prepare("SELECT idUsuarios, nombre_usuario, password, rol, estado
 $stmt->execute([':u' => $username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$user) {
-    $_SESSION['flash_error'] = 'Credenciales incorrectas.';
-    header('Location: login.php');
-    exit;
-}
-
-if (($user['estado'] ?? 'activo') !== 'activo') {
-    $_SESSION['flash_error'] = 'Su cuenta está inactiva. Contacte al administrador.';
+if (!$user || ($user['estado'] ?? 'activo') !== 'activo') {
+    $_SESSION['flash_error'] = 'Usuario no válido o inactivo.';
     header('Location: login.php');
     exit;
 }
 
 if (!password_verify($password, $user['password'])) {
-    $_SESSION['flash_error'] = 'Credenciales incorrectas.';
+    $_SESSION['flash_error'] = 'Contraseña incorrecta.';
     header('Location: login.php');
     exit;
 }
 
+// Regenerar ID de sesión (previene session fixation)
 session_regenerate_id(true);
 
 $_SESSION['user'] = [
@@ -55,12 +47,11 @@ $_SESSION['user'] = [
     'rol'  => $user['rol'] ?? 'usuario',
 ];
 
+// Actualizar último acceso (no crítico si la columna no existe)
 try {
-    $stmt = $pdo->prepare("UPDATE usuarios SET ultimo_acceso = NOW() WHERE idUsuarios = ?");
-    $stmt->execute([$user['idUsuarios']]);
-} catch (Exception $e) {
-    error_log("Error al actualizar ultimo_acceso: " . $e->getMessage());
-}
+    $pdo->prepare("UPDATE usuarios SET ultimo_acceso = NOW() WHERE idUsuarios = ?")
+        ->execute([$user['idUsuarios']]);
+} catch (Exception $e) {}
 
 header('Location: index.php');
 exit;
