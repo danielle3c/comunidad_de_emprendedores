@@ -150,8 +150,8 @@ include 'includes/header.php';
                 <button class="btn btn-sm btn-outline-secondary">Buscar</button>
             </form>
             <a href="personas.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
-            <a class=\"btn btn-outline-primary btn-sm\" target=\"_blank\" href=\"personas_print_all.php<?= \$search ? '?search='.urlencode(\$search) : '' ?>\">
-              <i class=\"bi bi-printer\"></i> Imprimir TODO
+            <a class="btn btn-outline-primary btn-sm" target="_blank" href="personas_print_all.php<?= $search ? '?search='.urlencode($search) : '' ?>">
+              <i class="bi bi-printer"></i> Imprimir TODO
             </a>
         </div>
     
