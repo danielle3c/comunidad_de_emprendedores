@@ -646,3 +646,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
   .table td, .table thead th { color: #000 !important; background: #fff !important; border-color: #ddd !important; }
   .badge { border: 1px solid #999 !important; color: #000 !important; background: #eee !important; }
 }
+
+
+/* ==== OVERRIDES: Controles desactivados por solicitud ==== */
+.sys-controls, .brightness-rail, .bg-canvas { display: none !important; }
