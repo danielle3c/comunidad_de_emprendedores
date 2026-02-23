@@ -22,69 +22,83 @@ try {
     $pdo   = getConnection();
     $qLike = '%' . $q . '%';
 
-    // PDO con named params NO permite repetir el mismo :param más de una vez.
-    // Solución: usar ? (positional) o dar un nombre distinto a cada ocurrencia.
-    $sql = "
-        SELECT
-            p.idpersonas                                          AS id,
-            p.rut,
-            CONCAT(p.nombres, ' ', p.apellidos)                   AS nombre,
-            p.telefono,
-            p.email,
-            EXISTS (
-                SELECT 1 FROM emprendedores e
-                WHERE e.personas_idpersonas = p.idpersonas
-            ) AS es_emprendedor,
-            EXISTS (
-                SELECT 1 FROM emprendedores e
-                JOIN Contratos c ON c.emprendedores_idemprendedores = e.idemprendedores
-                WHERE e.personas_idpersonas = p.idpersonas AND c.estado = 'Activo'
-            ) AS contrato_activo,
-            EXISTS (
-                SELECT 1 FROM emprendedores e
-                JOIN creditos cr ON cr.emprendedores_idemprendedores = e.idemprendedores
-                WHERE e.personas_idpersonas = p.idpersonas AND cr.estado = 'Activo'
-            ) AS credito_activo,
-            EXISTS (
-                SELECT 1 FROM emprendedores e
-                JOIN inscripciones_talleres it ON it.emprendedores_idemprendedores = e.idemprendedores
-                WHERE e.personas_idpersonas = p.idpersonas
-            ) AS talleres,
-            EXISTS (
-                SELECT 1 FROM emprendedores e
-                JOIN creditos cr ON cr.emprendedores_idemprendedores = e.idemprendedores
-                JOIN cobranzas cb ON cb.creditos_idcreditos = cr.idcreditos
-                WHERE e.personas_idpersonas = p.idpersonas
-            ) AS tiene_pagos
-        FROM personas p
-        WHERE p.estado = 1
-          AND (
-                p.rut                             LIKE ?
-             OR p.nombres                         LIKE ?
-             OR p.apellidos                       LIKE ?
-             OR CONCAT(p.nombres,' ',p.apellidos) LIKE ?
-          )
-        ORDER BY p.apellidos, p.nombres
+    // PASO 1: buscar personas — SQL simple sin subqueries, cero problemas de parámetros
+    $stmt = $pdo->prepare("
+        SELECT idpersonas AS id, rut,
+               CONCAT(nombres, ' ', apellidos) AS nombre,
+               telefono, email
+        FROM   personas
+        WHERE  estado = 1
+          AND  (rut     LIKE ?
+            OR  nombres LIKE ?
+            OR  apellidos LIKE ?
+            OR  CONCAT(nombres,' ',apellidos) LIKE ?)
+        ORDER BY apellidos, nombres
         LIMIT 10
-    ";
-
-    // Pasar el mismo valor 4 veces como positional params (uno por cada ?)
-    $stmt = $pdo->prepare($sql);
+    ");
     $stmt->execute([$qLike, $qLike, $qLike, $qLike]);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $personas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $out = array_map(fn($r) => [
-        'id'              => (int)  $r['id'],
-        'rut'             =>        $r['rut'],
-        'nombre'          =>        $r['nombre'],
-        'telefono'        =>        $r['telefono'] ?? '',
-        'email'           =>        $r['email']    ?? '',
-        'es_emprendedor'  => (bool) $r['es_emprendedor'],
-        'contrato_activo' => (bool) $r['contrato_activo'],
-        'credito_activo'  => (bool) $r['credito_activo'],
-        'talleres'        => (bool) $r['talleres'],
-        'tiene_pagos'     => (bool) $r['tiene_pagos'],
-    ], $rows);
+    if (empty($personas)) {
+        echo json_encode([]);
+        exit;
+    }
+
+    // PASO 2: para cada persona, buscar badges con queries simples separadas
+    // Así evitamos TODOS los problemas de parámetros en subqueries
+    $out = [];
+    foreach ($personas as $p) {
+        $pid = (int)$p['id'];
+
+        // ¿Es emprendedor?
+        $s = $pdo->prepare("SELECT idemprendedores FROM emprendedores WHERE personas_idpersonas = ? LIMIT 1");
+        $s->execute([$pid]);
+        $emp = $s->fetch();
+        $eid = $emp ? (int)$emp['idemprendedores'] : null;
+
+        $contrato = false;
+        $credito  = false;
+        $talleres = false;
+        $pagos    = false;
+
+        if ($eid) {
+            // ¿Contrato activo?
+            $s = $pdo->prepare("SELECT 1 FROM Contratos WHERE emprendedores_idemprendedores = ? AND estado = 'Activo' LIMIT 1");
+            $s->execute([$eid]);
+            $contrato = (bool)$s->fetchColumn();
+
+            // ¿Crédito activo?
+            $s = $pdo->prepare("SELECT idcreditos FROM creditos WHERE emprendedores_idemprendedores = ? AND estado = 'Activo' LIMIT 1");
+            $s->execute([$eid]);
+            $cred_row = $s->fetch();
+            $credito  = (bool)$cred_row;
+
+            // ¿Talleres?
+            $s = $pdo->prepare("SELECT 1 FROM inscripciones_talleres WHERE emprendedores_idemprendedores = ? LIMIT 1");
+            $s->execute([$eid]);
+            $talleres = (bool)$s->fetchColumn();
+
+            // ¿Pagos? — solo si tiene crédito
+            if ($cred_row) {
+                $s = $pdo->prepare("SELECT 1 FROM cobranzas WHERE creditos_idcreditos = ? LIMIT 1");
+                $s->execute([$cred_row['idcreditos']]);
+                $pagos = (bool)$s->fetchColumn();
+            }
+        }
+
+        $out[] = [
+            'id'              => $pid,
+            'rut'             => $p['rut'],
+            'nombre'          => $p['nombre'],
+            'telefono'        => $p['telefono'] ?? '',
+            'email'           => $p['email']    ?? '',
+            'es_emprendedor'  => (bool)$eid,
+            'contrato_activo' => $contrato,
+            'credito_activo'  => $credito,
+            'talleres'        => $talleres,
+            'tiene_pagos'     => $pagos,
+        ];
+    }
 
     echo json_encode($out, JSON_UNESCAPED_UNICODE);
 
