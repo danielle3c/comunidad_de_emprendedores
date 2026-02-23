@@ -20,7 +20,6 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ob_start();
 ?>
-
 <div class="container-fluid py-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
@@ -29,12 +28,11 @@ ob_start();
         Total: <?= count($rows) ?><?= $search ? ' | Filtro: '.htmlspecialchars($search) : '' ?>
       </small>
     </div>
-
     <div class="d-flex gap-2">
-      <?php include __DIR__ . '/includes/print_button.php'; ?>
-      <a href="personas.php<?= $search ? '?search='.urlencode($search) : '' ?>" class="btn btn-outline-secondary btn-sm">
-        Volver
-      </a>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">
+        <i class="bi bi-printer"></i> PDF / Imprimir
+      </button>
+      <a href="personas.php<?= $search ? '?search='.urlencode($search) : '' ?>" class="btn btn-outline-secondary btn-sm">Volver</a>
     </div>
   </div>
 
@@ -68,7 +66,6 @@ ob_start();
     </div>
   </div>
 </div>
-
 <?php
 $content = ob_get_clean();
 include __DIR__ . '/includes/layout.php';

@@ -1,0 +1,34 @@
+/* print-styles.css */
+@media print {
+  @page {
+    size: auto; /* Reset the page size */
+    margin: 20mm 10mm; /* Adjust top and left margin to account for your header */
+  }
+
+  table thead tr {
+    background-color: #3498db;
+    font-size: 14px;
+  }
+
+  /* .dataTable > thead > tr {
+    background-color: #3498db;
+    font-size: 14px;
+  } */
+
+  body {
+    margin: 0; /* Reset body margin */
+  }
+
+  .hidden-print {
+    display: none !important;
+  }
+
+  body h1 { /* head > title remove */
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  #container {
+    display: block !important; /* Display the container content */
+  }
+}

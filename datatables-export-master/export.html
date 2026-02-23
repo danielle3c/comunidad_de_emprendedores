@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>DataTables PDF Export Example</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+    integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.72/pdfmake.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.72/vfs_fonts.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" type="text/css" href="print-styles.css">
+
+  <script>
+    $(document).ready(function () {
+      $('#example').DataTable({
+        dom: 'Bfrtip',
+        buttons: get_btns({
+          excel: {
+            rename: [
+              {
+                index: 4,
+                value: 'Start Date'
+              },
+              {
+                index: 5,
+                value: 'Gross Salary'
+              }
+            ]
+          },
+          pdf: {
+            filename: 'Export file',
+            customize: {
+              rename: [
+                {
+                  index: 4,
+                  value: 'Start Date'
+                },
+                {
+                  index: 5,
+                  value: 'Gross Salary'
+                }
+              ],
+              showIcon: true,
+              title: 'Document Title',
+              description: 'Paragrph as description about the table data'
+            }
+          },
+          csv: {
+            customize: {
+              rename: [
+                {
+                  index: 4,
+                  value: 'Start Date'
+                },
+                {
+                  index: 5,
+                  value: 'Gross Salary'
+                }
+              ]
+            }
+          },
+          print: {
+            customize: {
+              rename: [
+                {
+                  index: 4,
+                  value: 'Start Date'
+                },
+                {
+                  index: 5,
+                  value: 'Gross Salary'
+                }
+              ]
+            }
+          }
+        })
+      });
+    });
+
+    function _default_export_btn_list(key = '') {
+      const default_btns = {
+        excel: {
+          extend: 'excel',
+          text: '<i class="fa fa-file-excel fa-xl"></i>',
+          titleAttr: 'Export to Excel',
+          filename: 'Export file',
+          title: '',
+          exportOptions: {
+            columns: 'thead th:not(.noExport)'
+          }
+        },
+        csv: {
+          extend: 'csv',
+          text: '<i class="fa fa-file-csv fa-xl"></i>',
+          titleAttr: 'Export to CSV',
+          filename: 'Export file',
+          exportOptions: {
+            columns: 'thead th:not(.noExport)'
+          }
+        },
+        pdf: {
+          extend: 'pdf',
+          text: '<i class="fa fa-file-pdf fa-xl"></i>',
+          titleAttr: 'Export to PDF',
+          filename: 'Export file',
+          exportOptions: {
+            columns: 'thead th:not(.noExport)'
+          },
+          orientation: 'portrait',
+          pageSize: 'A4'
+        },
+        print: {
+          extend: 'print',
+          text: '<i class="fa fa-print fa-xl"></i>',
+          pageSize: 'A4',
+          orientation: 'landscape',
+          margin: [10, 10, 10, 10], // Top, right, bottom, left
+          headRowColor: '#3498db', // Blue color for table head row
+          fontSize: '14px', // Font size for table head row
+          exportOptions: {
+            columns: 'thead th:not(.noExport)'
+          }
+        }
+      }
+
+      return key === '' ? default_btns : default_btns[key];
+    }
+
+
+    function _print(params) {
+      return function (win) {
+        // Set page size and orientation
+        $(win.document.body).css({
+          'margin': '20mm 10mm 20mm 10mm'
+        });
+
+        // Clone the content of the #container div and append it before the table
+        var containerContent = $('#container').clone();
+        $(win.document.body).prepend(containerContent);
+
+        if (params.rename) {
+          var tableHead = $(win.document.body).find('table thead tr th');
+
+          (params.rename || []).forEach(param => {
+            if (tableHead.length > param.index) {
+              $(tableHead[param.index]).text(param.value);
+            }
+          });
+        }
+
+        // Print the document
+        win.print();
+      };
+    }
+
+    function _customize_pdf(params) {
+      return function (doc) {
+        // Customization of the PDF content
+        const tableBody = doc.content.find(obj => obj.table !== undefined);
+
+        if (tableBody && Array.isArray(tableBody.table.body) && tableBody.table.body.length > 0) {
+          // rename table header name(s)
+          (params.rename || []).forEach(param => {
+            if (doc.content[1].table.body[0].length > param.index) {
+              doc.content[1].table.body[0][param.index].text = param.value;
+            }
+          });
+
+          // horizontally center the table
+          var body = doc.content[1].table.body;
+
+          // Define the table with headerRows
+          var table = {
+            headerRows: 1, // Specify the number of rows that should be treated as headers
+            body: body,
+            layout: {
+              hLineWidth: function (i, node) {
+                return (i === 0 || i === node.table.body.length) ? 2 : 1;
+              },
+              vLineWidth: function (i, node) {
+                return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+              },
+              hLineColor: function (i, node) {
+                return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+              },
+              vLineColor: function (i, node) {
+                return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+              }
+            }
+          };
+
+          // Wrap the original table body in a three-column layout
+          doc.content[1] = {
+            columns: [
+              { width: '*', text: '' },
+              {
+                width: 'auto',
+                table: table // Include the table definition
+              },
+              { width: '*', text: '' }
+            ],
+            columnGap: 10
+          } // this affecting table outer boarder
+
+        }
+
+        // remove default title
+        doc.content.shift();
+
+        // footer - page number and text
+        doc.footer = function (currentPage, pageCount) {
+          return {
+            // Use a column layout within the footer to control spacing more effectively
+            columns: [
+              { width: '*', text: '' },// This column will be empty but serves to center the footer content horizontally
+              {
+                // Actual footer content, centered
+                width: 'auto',
+                stack: [
+                  {
+                    text: 'Page ' + currentPage.toString() + ' of ' + pageCount,
+                    alignment: 'center',
+                    fontSize: 10
+                  },
+                  {
+                    // Adjust the margin top to reduce space between lines, set to a smaller value
+                    text: 'Sample Text',
+                    alignment: 'center',
+                    margin: [0, 2, 0, 0], // Top margin reduced to reduce space
+                    fontSize: 10
+                  }
+                ]
+              },
+              { width: '*', text: '' },// This column will be empty but serves to center the footer content horizontally
+            ],
+            // Optionally, adjust the columnGap if needed, though it may not be necessary for centering
+            columnGap: 10
+          };
+        };
+
+        const icon = params.showIcon ? {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="512" height="512"><path d="M18,8.5a2.5,2.5,0,0,1-5,0A2.5,2.5,0,0,1,18,8.5Zm-.006,6.866a11.065,11.065,0,0,1-1.163,4.569A7.634,7.634,0,0,1,10,24H9V18.5A3.517,3.517,0,0,0,5.5,15H0V14A7.634,7.634,0,0,1,4.065,7.169,11.065,11.065,0,0,1,8.634,6.006,15.487,15.487,0,0,1,20.972,0h0A3.009,3.009,0,0,1,24,3,15.507,15.507,0,0,1,17.994,15.366ZM2.084,13H4.346A34.361,34.361,0,0,1,6.955,8.237a8.993,8.993,0,0,0-1.993.72A5.519,5.519,0,0,0,2.084,13Zm13.679,4.045A34.361,34.361,0,0,1,11,19.654v2.262a5.519,5.519,0,0,0,4.043-2.878A8.993,8.993,0,0,0,15.763,17.045ZM22,2.972A1,1,0,0,0,21,2c-5.16.147-8.65,2.124-12.018,6.822a29.92,29.92,0,0,0-2.471,4.271,5.5,5.5,0,0,1,4.4,4.4,29.92,29.92,0,0,0,4.271-2.471C19.876,11.65,21.853,8.16,22,2.972ZM6.122,17.879a3.015,3.015,0,0,1,0,4.242c-.907.906-3.622,1.465-4.748,1.664l-1.406.247.247-1.406c.2-1.126.758-3.841,1.664-4.748A3.073,3.073,0,0,1,6.122,17.879ZM5,20a.993.993,0,0,0-.293-.707,1,1,0,0,0-1.414,0A7.318,7.318,0,0,0,2.5,21.5a7.342,7.342,0,0,0,2.208-.794A.993.993,0,0,0,5,20Z"/></svg>',
+          alignment: 'center',
+          width: 80,
+          height: 80
+        } : '';
+
+        const title = params.title !== null && params.title !== '' ? {
+          text: params.title,
+          style: 'header'
+        } : '';
+
+        const description = params.description !== null && params.description !== '' ? {
+          text: params.description,
+          style: 'subheader'
+        } : '';
+
+        doc.content.unshift(
+          icon,
+          title,
+          description,
+          _htmlToPdfMakeContent('container')
+        );
+
+        doc.styles = {
+          header: {
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 10],
+            alignment: 'center'
+          },
+          subheader: {
+            fontSize: 12,
+            bold: true,
+            margin: [0, 10, 0, 5]
+          },
+          tableHeader: {
+            bold: true,
+            fontSize: 13,
+            fillColor: '#4CAF50', // Green header
+            color: 'white'
+          },
+          tableBodyOdd: {
+            fillColor: 'white'
+          },
+          tableBodyEven: {
+            fillColor: '#F0F0F0'
+          }
+        }
+      }
+    }
+
+    function _customize_excel(params) {
+      return function (data) {
+        (params.rename || []).forEach(param => {
+          if (data.header.length > param.index) {
+            data.header[param.index] = param.value;
+          }
+        });
+      }
+    }
+
+    function _customize_csv(params) {
+      return (csv) => {
+        let rows = csv.split('\n');
+        let headers = rows[0].split(',');
+
+        (params.rename || []).forEach(param => {
+          if (headers.length > param.index) {
+            headers[param.index] = param.value;
+          }
+        });
+
+        rows[0] = headers.join(',');
+        csv = rows.join('\n');
+
+        return csv;
+      }
+    }
+
+    function get_btns(param) {
+      if (param === '' || param === null || param === undefined) {
+        return [...Object.values(_default_export_btn_list())];
+      } else if (typeof param === 'object' && !Array.isArray(param)) {
+        let export_btn_list = [];
+
+        for (let [key, attr] of Object.entries(param)) {
+          if (typeof attr === 'boolean' && attr) {
+            const btn = _default_export_btn_list()[key] || [];
+
+            export_btn_list = [...export_btn_list, btn];
+          } else if (typeof attr === 'object') {
+            let default_attr = _default_export_btn_list()[key] || [];
+
+            for (const [k, v] of Object.entries(attr)) {
+              if (k === 'customize' && typeof v === 'object') {
+                if (key === 'pdf') {
+                  default_attr['customize'] = _customize_pdf(v);
+                } else if (key === 'excel') {
+                  default_attr['customizeData'] = _customize_excel(v);
+                } else if (key == 'csv') {
+                  default_attr['customize'] = _customize_csv(v);
+                } else if (key === 'print') {
+                  default_attr['customize'] = _print(v);
+                }
+              } else {
+                Object.defineProperty(default_attr, k, {
+                  value: v || default_attr[k],
+                  writable: true,
+                  enumerable: true,
+                  configurable: true
+                });
+              }
+            }
+
+            export_btn_list = [...export_btn_list, default_attr];
+          }
+        }
+
+        return export_btn_list;
+      } else {
+        if (typeof param === 'string') {
+          param = param.split(',');
+        }
+
+        return (param || []).reduce((acc, current) => {
+          if (current !== '') {
+            const btn = _default_export_btn_list()[current] || [];
+            acc = [...acc, btn];
+          }
+
+          return acc;
+        }, [])
+      }
+    }
+
+    function _process_element(element) {
+      let columnStack = { stack: [], margin: [0, 5, 0, 5], alignment: 'center' };
+
+      element.children().each(function () {
+        let tagName = this.tagName.toLowerCase();
+        let elementText = $(this).text();
+
+        switch (tagName) {
+          case 'label':
+            columnStack.stack.push({ text: elementText, bold: true });
+            break;
+          case 'span':
+            columnStack.stack.push({ text: elementText });
+            break;
+          default:
+            columnStack.stack.push({ text: elementText });
+            break;
+        }
+      });
+
+      return columnStack;
+    }
+
+    /**
+     * Able to parse the below html contents
+     * 
+     * <div id="container">
+        <div class="row">
+          <p>1</p>
+        </div>
+        <div class="row">
+          <p class="noExport">2</p>
+          <span>3</span>
+        </div>
+        <div class="row">
+          <div class="col-md-4"><label>4</label><span>a</span></div>
+          <div class="col-md-4"><label>5</label><span>b</span></div>
+          <div class="col-md-4"><label>6</label><span>c</span></div>
+        </div>
+        <div class="row">
+          <div class="col-md-4"><label>7</label><span>d</span></div>
+          <div class="col-md-4"><label>8</label><span>e</span></div>
+          <div class="col-md-4"><label>9</label><span>f</span></div>
+        </div>
+        <div class="row">
+          <p>g</p>
+        </div>
+      </div>
+    *
+    */
+    function _htmlToPdfMakeContent(selector) {
+      let contentBlocks = [];
+
+      // Loop through the children and dynamically determine the structure
+      $("#" + selector).children().each(function () {
+        // Skip elements with class 'noExport'
+        if ($(this).hasClass('noExport')) {
+          return;
+        }
+
+        let rowContent = {
+          columns: [],
+          columnGap: 10,
+          margin: [0, 5],
+          color: '#333',
+          border: [true, true, true, true],
+          borderColor: '#999',
+          padding: [5, 10],
+          background: '#f5f5f5',
+          shadow: [2, 2, 2, '#999'],
+        };
+
+        $(this).children().each(function () {
+          // Skip elements with class 'noExport'
+          if ($(this).hasClass('noExport')) {
+            return;
+          }
+
+          if ($(this).children().length > 0) {
+            rowContent.columns.push(_process_element($(this)));
+          } else {
+            if ($(this).prop("tagName").toLowerCase() === 'p' || $(this).prop("tagName").toLowerCase() === 'span') {
+              rowContent.columns.push({ stack: [{ text: $(this).text(), margin: [0, 5] }] });
+            }
+          }
+        });
+
+        if (rowContent.columns.length > 0) {
+          contentBlocks.push(rowContent);
+        }
+      });
+
+      return contentBlocks;
+    }
+
+
+
+    /**
+     * Able to parse the below html contents
+     * <div id="container">
+        <ul>
+          <li><span>1</span><span>b</span></li>
+          <li><span>2</span><span>b</span></li>
+          <li><span>3</span><span>b</span></li>
+          <li><span>4</span><span>b</span></li>
+          <li><span>5</span><span>b</span></li>
+          <li><span>6</span><span>b</span></li>
+        </ul>
+      </div>
+      */
+    function html2pdfMake(containerId) {
+      const NUM_ITEMS_IN_ROW = 4;
+      const container = document.getElementById(containerId);
+      let content = [];
+      let row = { columns: [], margin: [0, 5, 0, 5] }; // Adjust margins as needed
+
+      function addSpanToRow(spanText) {
+        // Each span as a separate line in a cell
+        return { stack: [{ text: spanText }], margin: [0, 2, 0, 2] }; // Adjust margins as needed
+      }
+
+      if (container) {
+        const ul = container.querySelector('ul');
+        if (ul) {
+          let itemCount = 0;
+          ul.querySelectorAll('li').forEach(li => {
+            const spans = li.querySelectorAll('span');
+            const spanArray = Array.from(spans).map(span => addSpanToRow(span.textContent));
+            row.columns.push({ stack: spanArray });
+
+            itemCount++;
+            // Check if we've filled the row or it's the last item
+            if (itemCount % NUM_ITEMS_IN_ROW === 0 || itemCount === ul.querySelectorAll('li').length) {
+              content.push(row);
+              row = { columns: [], margin: [0, 5, 0, 5] }; // Reset for the next row
+            }
+          });
+        }
+      }
+
+      // Return just the array
+      return content;
+    }
+
+  </script>
+</head>
+
+<body>
+  <div id="">
+    <ul>
+      <li><span>1</span><span>b</span></li>
+      <li><span>2</span><span>b</span></li>
+      <li><span>3</span><span>b</span></li>
+      <li><span>4</span><span>b</span></li>
+      <li><span>5</span><span>b</span></li>
+      <li><span>6</span><span>b</span></li>
+    </ul>
+  </div>
+  <div id="container">
+    <div class="row">
+      <p>1</p>
+    </div>
+    <div class="row">
+      <p class="noExport">2</p>
+      <span>3</span>
+    </div>
+    <div class="row">
+      <div class="col-md-4"><label>4</label><span>a</span></div>
+      <div class="col-md-4"><label>5</label><span>b</span></div>
+      <div class="col-md-4"><label>6</label><span>c</span></div>
+    </div>
+    <div class="row">
+      <div class="col-md-4"><label>7</label><span>d</span></div>
+      <div class="col-md-4"><label>8</label><span>e</span></div>
+      <div class="col-md-4"><label>9</label><span>f</span></div>
+    </div>
+    <div class="row">
+      <p>g</p>
+    </div>
+  </div>
+
+  <table id="example" class="display" style="width:100%">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Office</th>
+        <th>Age</th>
+        <th>Start date</th>
+        <th>Salary</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Tiger Nixon</td>
+        <td>System Architect</td>
+        <td>Edinburgh</td>
+        <td>61</td>
+        <td>2011-04-25</td>
+        <td>$320,800</td>
+      </tr>
+      <tr>
+        <td>Garrett Winters</td>
+        <td>Accountant</td>
+        <td>Tokyo</td>
+        <td>63</td>
+        <td>2011-07-25</td>
+        <td>$170,750</td>
+      </tr>
+      <tr>
+        <td>Ashton Cox</td>
+        <td>Junior Technical Author</td>
+        <td>San Francisco</td>
+        <td>66</td>
+        <td>2009-01-12</td>
+        <td>$86,000</td>
+      </tr>
+      <tr>
+        <td>Cedric Kelly</td>
+        <td>Senior Javascript Developer</td>
+        <td>Edinburgh</td>
+        <td>22</td>
+        <td>2012-03-29</td>
+        <td>$433,060</td>
+      </tr>
+      <tr>
+        <td>Airi Satou</td>
+        <td>Accountant</td>
+        <td>Tokyo</td>
+        <td>33</td>
+        <td>2008-11-28</td>
+        <td>$162,700</td>
+      </tr>
+      <tr>
+        <td>Brielle Williamson</td>
+        <td>Integration Specialist</td>
+        <td>New York</td>
+        <td>61</td>
+        <td>2012-12-02</td>
+        <td>$372,000</td>
+      </tr>
+      <tr>
+        <td>Herrod Chandler</td>
+        <td>Sales Assistant</td>
+        <td>San Francisco</td>
+        <td>59</td>
+        <td>2012-08-06</td>
+        <td>$137,500</td>
+      </tr>
+      <tr>
+        <td>Rhona Davidson</td>
+        <td>Integration Specialist</td>
+        <td>Tokyo</td>
+        <td>55</td>
+        <td>2010-10-14</td>
+        <td>$327,900</td>
+      </tr>
+      <tr>
+        <td>Colleen Hurst</td>
+        <td>Javascript Developer</td>
+        <td>San Francisco</td>
+        <td>39</td>
+        <td>2009-09-15</td>
+        <td>$205,500</td>
+      </tr>
+      <tr>
+        <td>Sonya Frost</td>
+        <td>Software Engineer</td>
+        <td>Edinburgh</td>
+        <td>23</td>
+        <td>2008-12-13</td>
+        <td>$103,600</td>
+      </tr>
+      <tr>
+        <td>Jena Gaines</td>
+        <td>Office Manager</td>
+        <td>London</td>
+        <td>30</td>
+        <td>2008-12-19</td>
+        <td>$90,560</td>
+      </tr>
+      <tr>
+        <td>Quinn Flynn</td>
+        <td>Support Lead</td>
+        <td>Edinburgh</td>
+        <td>22</td>
+        <td>2013-03-03</td>
+        <td>$342,000</td>
+      </tr>
+      <tr>
+        <td>Charde Marshall</td>
+        <td>Regional Director</td>
+        <td>San Francisco</td>
+        <td>36</td>
+        <td>2008-10-16</td>
+        <td>$470,600</td>
+      </tr>
+      <tr>
+        <td>Haley Kennedy</td>
+        <td>Senior Marketing Designer</td>
+        <td>London</td>
+        <td>43</td>
+        <td>2012-12-18</td>
+        <td>$313,500</td>
+      </tr>
+      <tr>
+        <td>Tatyana Fitzpatrick</td>
+        <td>Regional Director</td>
+        <td>London</td>
+        <td>19</td>
+        <td>2010-03-17</td>
+        <td>$385,750</td>
+      </tr>
+      <tr>
+        <td>Michael Silva</td>
+        <td>Marketing Designer</td>
+        <td>London</td>
+        <td>66</td>
+        <td>2012-11-27</td>
+        <td>$198,500</td>
+      </tr>
+      <tr>
+        <td>Paul Byrd</td>
+        <td>Chief Financial Officer (CFO)</td>
+        <td>New York</td>
+        <td>64</td>
+        <td>2010-06-09</td>
+        <td>$725,000</td>
+      </tr>
+      <tr>
+        <td>Gloria Little</td>
+        <td>Systems Administrator</td>
+        <td>New York</td>
+        <td>59</td>
+        <td>2009-04-10</td>
+        <td>$237,500</td>
+      </tr>
+      <tr>
+        <td>Bradley Greer</td>
+        <td>Software Engineer</td>
+        <td>London</td>
+        <td>41</td>
+        <td>2012-10-13</td>
+        <td>$132,000</td>
+      </tr>
+      <tr>
+        <td>Dai Rios</td>
+        <td>Personnel Lead</td>
+        <td>Edinburgh</td>
+        <td>35</td>
+        <td>2012-09-26</td>
+        <td>$217,500</td>
+      </tr>
+      <tr>
+        <td>Jenette Caldwell</td>
+        <td>Development Lead</td>
+        <td>New York</td>
+        <td>30</td>
+        <td>2011-09-03</td>
+        <td>$345,000</td>
+      </tr>
+      <tr>
+        <td>Yuri Berry</td>
+        <td>Chief Marketing Officer (CMO)</td>
+        <td>New York</td>
+        <td>40</td>
+        <td>2009-06-25</td>
+        <td>$675,000</td>
+      </tr>
+      <tr>
+        <td>Caesar Vance</td>
+        <td>Pre-Sales Support</td>
+        <td>New York</td>
+        <td>21</td>
+        <td>2011-12-12</td>
+        <td>$106,450</td>
+      </tr>
+      <tr>
+        <td>Doris Wilder</td>
+        <td>Sales Assistant</td>
+        <td>Sydney</td>
+        <td>23</td>
+        <td>2010-09-20</td>
+        <td>$85,600</td>
+      </tr>
+      <tr>
+        <td>Angelica Ramos</td>
+        <td>Chief Executive Officer (CEO)</td>
+        <td>London</td>
+        <td>47</td>
+        <td>2009-10-09</td>
+        <td>$1,200,000</td>
+      </tr>
+      <tr>
+        <td>Gavin Joyce</td>
+        <td>Developer</td>
+        <td>Edinburgh</td>
+        <td>42</td>
+        <td>2010-12-22</td>
+        <td>$92,575</td>
+      </tr>
+      <tr>
+        <td>Jennifer Chang</td>
+        <td>Regional Director</td>
+        <td>Singapore</td>
+        <td>28</td>
+        <td>2010-11-14</td>
+        <td>$357,650</td>
+      </tr>
+      <tr>
+        <td>Brenden Wagner</td>
+        <td>Software Engineer</td>
+        <td>San Francisco</td>
+        <td>28</td>
+        <td>2011-06-07</td>
+        <td>$206,850</td>
+      </tr>
+      <tr>
+        <td>Fiona Green</td>
+        <td>Chief Operating Officer (COO)</td>
+        <td>San Francisco</td>
+        <td>48</td>
+        <td>2010-03-11</td>
+        <td>$850,000</td>
+      </tr>
+      <tr>
+        <td>Shou Itou</td>
+        <td>Regional Marketing</td>
+        <td>Tokyo</td>
+        <td>20</td>
+        <td>2011-08-14</td>
+        <td>$163,000</td>
+      </tr>
+      <tr>
+        <td>Michelle House</td>
+        <td>Integration Specialist</td>
+        <td>Sydney</td>
+        <td>37</td>
+        <td>2011-06-02</td>
+        <td>$95,400</td>
+      </tr>
+      <tr>
+        <td>Suki Burks</td>
+        <td>Developer</td>
+        <td>London</td>
+        <td>53</td>
+        <td>2009-10-22</td>
+        <td>$114,500</td>
+      </tr>
+      <tr>
+        <td>Prescott Bartlett</td>
+        <td>Technical Author</td>
+        <td>London</td>
+        <td>27</td>
+        <td>2011-05-07</td>
+        <td>$145,000</td>
+      </tr>
+      <tr>
+        <td>Gavin Cortez</td>
+        <td>Team Leader</td>
+        <td>San Francisco</td>
+        <td>22</td>
+        <td>2008-10-26</td>
+        <td>$235,500</td>
+      </tr>
+      <tr>
+        <td>Martena Mccray</td>
+        <td>Post-Sales support</td>
+        <td>Edinburgh</td>
+        <td>46</td>
+        <td>2011-03-09</td>
+        <td>$324,050</td>
+      </tr>
+      <tr>
+        <td>Unity Butler</td>
+        <td>Marketing Designer</td>
+        <td>San Francisco</td>
+        <td>47</td>
+        <td>2009-12-09</td>
+        <td>$85,675</td>
+      </tr>
+      <tr>
+        <td>Howard Hatfield</td>
+        <td>Office Manager</td>
+        <td>San Francisco</td>
+        <td>51</td>
+        <td>2008-12-16</td>
+        <td>$164,500</td>
+      </tr>
+      <tr>
+        <td>Hope Fuentes</td>
+        <td>Secretary</td>
+        <td>San Francisco</td>
+        <td>41</td>
+        <td>2010-02-12</td>
+        <td>$109,850</td>
+      </tr>
+      <tr>
+        <td>Vivian Harrell</td>
+        <td>Financial Controller</td>
+        <td>San Francisco</td>
+        <td>62</td>
+        <td>2009-02-14</td>
+        <td>$452,500</td>
+      </tr>
+      <tr>
+        <td>Timothy Mooney</td>
+        <td>Office Manager</td>
+        <td>London</td>
+        <td>37</td>
+        <td>2008-12-11</td>
+        <td>$136,200</td>
+      </tr>
+      <tr>
+        <td>Jackson Bradshaw</td>
+        <td>Director</td>
+        <td>New York</td>
+        <td>65</td>
+        <td>2008-09-26</td>
+        <td>$645,750</td>
+      </tr>
+      <tr>
+        <td>Olivia Liang</td>
+        <td>Support Engineer</td>
+        <td>Singapore</td>
+        <td>64</td>
+        <td>2011-02-03</td>
+        <td>$234,500</td>
+      </tr>
+      <tr>
+        <td>Bruno Nash</td>
+        <td>Software Engineer</td>
+        <td>London</td>
+        <td>38</td>
+        <td>2011-05-03</td>
+        <td>$163,500</td>
+      </tr>
+      <tr>
+        <td>Sakura Yamamoto</td>
+        <td>Support Engineer</td>
+        <td>Tokyo</td>
+        <td>37</td>
+        <td>2009-08-19</td>
+        <td>$139,575</td>
+      </tr>
+      <tr>
+        <td>Thor Walton</td>
+        <td>Developer</td>
+        <td>New York</td>
+        <td>61</td>
+        <td>2013-08-11</td>
+        <td>$98,540</td>
+      </tr>
+      <tr>
+        <td>Finn Camacho</td>
+        <td>Support Engineer</td>
+        <td>San Francisco</td>
+        <td>47</td>
+        <td>2009-07-07</td>
+        <td>$87,500</td>
+      </tr>
+      <tr>
+        <td>Serge Baldwin</td>
+        <td>Data Coordinator</td>
+        <td>Singapore</td>
+        <td>64</td>
+        <td>2012-04-09</td>
+        <td>$138,575</td>
+      </tr>
+      <tr>
+        <td>Zenaida Frank</td>
+        <td>Software Engineer</td>
+        <td>New York</td>
+        <td>63</td>
+        <td>2010-01-04</td>
+        <td>$125,250</td>
+      </tr>
+      <tr>
+        <td>Zorita Serrano</td>
+        <td>Software Engineer</td>
+        <td>San Francisco</td>
+        <td>56</td>
+        <td>2012-06-01</td>
+        <td>$115,000</td>
+      </tr>
+      <tr>
+        <td>Jennifer Acosta</td>
+        <td>Junior Javascript Developer</td>
+        <td>Edinburgh</td>
+        <td>43</td>
+        <td>2013-02-01</td>
+        <td>$75,650</td>
+      </tr>
+      <tr>
+        <td>Cara Stevens</td>
+        <td>Sales Assistant</td>
+        <td>New York</td>
+        <td>46</td>
+        <td>2011-12-06</td>
+        <td>$145,600</td>
+      </tr>
+      <tr>
+        <td>Hermione Butler</td>
+        <td>Regional Director</td>
+        <td>London</td>
+        <td>47</td>
+        <td>2011-03-21</td>
+        <td>$356,250</td>
+      </tr>
+      <tr>
+        <td>Lael Greer</td>
+        <td>Systems Administrator</td>
+        <td>London</td>
+        <td>21</td>
+        <td>2009-02-27</td>
+        <td>$103,500</td>
+      </tr>
+      <tr>
+        <td>Jonas Alexander</td>
+        <td>Developer</td>
+        <td>San Francisco</td>
+        <td>30</td>
+        <td>2010-07-14</td>
+        <td>$86,500</td>
+      </tr>
+      <tr>
+        <td>Shad Decker</td>
+        <td>Regional Director</td>
+        <td>Edinburgh</td>
+        <td>51</td>
+        <td>2008-11-13</td>
+        <td>$183,000</td>
+      </tr>
+      <tr>
+        <td>Michael Bruce</td>
+        <td>Javascript Developer</td>
+        <td>Singapore</td>
+        <td>29</td>
+        <td>2011-06-27</td>
+        <td>$183,000</td>
+      </tr>
+      <tr>
+        <td>Donna Snider</td>
+        <td>Customer Support</td>
+        <td>New York</td>
+        <td>27</td>
+        <td>2011-01-25</td>
+        <td>$112,000</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Office</th>
+        <th>Age</th>
+        <th>Start date</th>
+        <th>Salary</th>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+
+</html>
