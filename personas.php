@@ -143,27 +143,44 @@ include 'includes/header.php';
 
 <!-- TABLA -->
 <div class="card">
-    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-        <span class="fw-semibold">Listado de Personas <span class="badge bg-secondary"><?= $total ?></span></span>
-        <div class="d-flex gap-2">
-            <form class="d-flex gap-2" method="GET">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
-                <button class="btn btn-sm btn-outline-secondary">Buscar</button>
-            </form>
-            <a href="personas.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
-        </div>
-    
-    <?php include __DIR__ . '/includes/print_button.php'; ?>
-</div>
-    <div class="card-body p-0">
+  <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">
+      Listado de Personas <span class="badge bg-secondary"><?= $total ?></span>
+    </span>
+
+    <div class="d-flex gap-2 align-items-center">
+      <form class="d-flex gap-2" method="GET">
+        <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
+        <button class="btn btn-sm btn-outline-secondary">Buscar</button>
+      </form>
+
+      <a href="personas.php?action=create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus"></i> Nuevo
+      </a>
+
+      <!-- Imprimir SOLO la página actual -->
+      <?php include __DIR__ . '/includes/print_button.php'; ?>
+
+      <!-- Imprimir TODO el listado (sin paginación) -->
+      <a class="btn btn-outline-primary btn-sm" target="_blank"
+         href="personas_print_all.php<?= $search ? '?search='.urlencode($search) : '' ?>">
+        <i class="bi bi-printer"></i> Imprimir TODO
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-hover mb-0">
+      <table class="table table-hover mb-0">
         <thead>
-            <tr><th>ID</th><th>RUT</th><th>Nombres</th><th>Apellidos</th><th>Teléfono</th><th>Email</th><th>Género</th><th>Estado</th><th>Acciones</th></tr>
+          <tr>
+            <th>ID</th><th>RUT</th><th>Nombres</th><th>Apellidos</th>
+            <th>Teléfono</th><th>Email</th><th>Género</th><th>Estado</th><th>Acciones</th>
+          </tr>
         </thead>
         <tbody>
         <?php foreach ($rows as $r): ?>
-        <tr>
+          <tr>
             <td><?= $r['idpersonas'] ?></td>
             <td><?= $r['rut'] ?></td>
             <td><?= sanitize($r['nombres']) ?></td>
@@ -173,21 +190,29 @@ include 'includes/header.php';
             <td><?= $r['genero'] ?></td>
             <td><?= badgeEstado((string)$r['estado']) ?></td>
             <td>
-                <a href="personas.php?action=edit&id=<?= $r['idpersonas'] ?>" class="btn btn-sm btn-outline-primary btn-action"><i class="bi bi-pencil"></i></a>
-                <a href="personas.php?action=delete&id=<?= $r['idpersonas'] ?>" class="btn btn-sm btn-outline-danger btn-action btn-delete"><i class="bi bi-trash"></i></a>
+              <a href="personas.php?action=edit&id=<?= $r['idpersonas'] ?>" class="btn btn-sm btn-outline-primary btn-action">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="personas.php?action=delete&id=<?= $r['idpersonas'] ?>" class="btn btn-sm btn-outline-danger btn-action btn-delete">
+                <i class="bi bi-trash"></i>
+              </a>
             </td>
-        </tr>
+          </tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?><tr><td colspan="9" class="text-center text-muted py-4">Sin registros</td></tr><?php endif; ?>
+
+        <?php if (!$rows): ?>
+          <tr><td colspan="9" class="text-center text-muted py-4">Sin registros</td></tr>
+        <?php endif; ?>
         </tbody>
-    </table>
+      </table>
     </div>
-    </div>
-    <?php if ($pag['totalPages'] > 1): ?>
+  </div>
+
+  <?php if ($pag['totalPages'] > 1): ?>
     <div class="card-footer bg-white border-0">
-        <?= renderPagination($pag, 'personas.php?search='.urlencode($search)) ?>
+      <?= renderPagination($pag, 'personas.php?search='.urlencode($search)) ?>
     </div>
-    <?php endif; ?>
+  <?php endif; ?>
 </div>
 
 <?php include 'includes/footer.php'; ?>

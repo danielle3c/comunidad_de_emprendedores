@@ -5,13 +5,17 @@ require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Listado completo de Personas (PDF)';
 $pdo = getConnection();
 
-// Traer TODAS las personas activas (sin paginación)
-$stmt = $pdo->query("
-  SELECT idpersonas, rut, nombres, apellidos, telefono, email, direccion
+$search = sanitize($_GET['search'] ?? '');
+$where  = $search ? "WHERE nombres LIKE :s OR apellidos LIKE :s OR rut LIKE :s OR email LIKE :s" : "";
+$params = $search ? [':s' => "%$search%"] : [];
+
+$stmt = $pdo->prepare("
+  SELECT idpersonas, rut, nombres, apellidos, telefono, email, genero, estado, direccion
   FROM personas
-  WHERE estado = 1
-  ORDER BY apellidos, nombres
+  $where
+  ORDER BY nombres ASC
 ");
+$stmt->execute($params);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ob_start();
@@ -21,10 +25,17 @@ ob_start();
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <h4 class="mb-0">Listado completo de Personas</h4>
-      <small class="text-muted">Impresión / PDF (todas las personas)</small>
+      <small class="text-muted">
+        Total: <?= count($rows) ?><?= $search ? ' | Filtro: '.htmlspecialchars($search) : '' ?>
+      </small>
     </div>
 
-    <?php include __DIR__ . '/includes/print_button.php'; ?>
+    <div class="d-flex gap-2">
+      <?php include __DIR__ . '/includes/print_button.php'; ?>
+      <a href="personas.php<?= $search ? '?search='.urlencode($search) : '' ?>" class="btn btn-outline-secondary btn-sm">
+        Volver
+      </a>
+    </div>
   </div>
 
   <div class="card">
@@ -32,25 +43,26 @@ ob_start();
       <table class="table table-striped table-hover mb-0">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>RUT</th>
-            <th>Nombre</th>
-            <th>Teléfono</th>
-            <th>Email</th>
-            <th>Dirección</th>
+            <th>ID</th><th>RUT</th><th>Nombres</th><th>Apellidos</th>
+            <th>Teléfono</th><th>Email</th><th>Género</th><th>Estado</th>
           </tr>
         </thead>
         <tbody>
-        <?php foreach ($rows as $p): ?>
+        <?php foreach ($rows as $r): ?>
           <tr>
-            <td><?= (int)$p['idpersonas'] ?></td>
-            <td><?= htmlspecialchars($p['rut'] ?? '') ?></td>
-            <td><?= htmlspecialchars(($p['nombres'] ?? '') . ' ' . ($p['apellidos'] ?? '')) ?></td>
-            <td><?= htmlspecialchars($p['telefono'] ?? '') ?></td>
-            <td><?= htmlspecialchars($p['email'] ?? '') ?></td>
-            <td><?= htmlspecialchars($p['direccion'] ?? '') ?></td>
+            <td><?= (int)$r['idpersonas'] ?></td>
+            <td><?= htmlspecialchars($r['rut'] ?? '') ?></td>
+            <td><?= htmlspecialchars($r['nombres'] ?? '') ?></td>
+            <td><?= htmlspecialchars($r['apellidos'] ?? '') ?></td>
+            <td><?= htmlspecialchars($r['telefono'] ?: '-') ?></td>
+            <td><?= htmlspecialchars($r['email'] ?: '-') ?></td>
+            <td><?= htmlspecialchars($r['genero'] ?? '') ?></td>
+            <td><?= badgeEstado((string)($r['estado'] ?? 0)) ?></td>
           </tr>
         <?php endforeach; ?>
+        <?php if (!$rows): ?>
+          <tr><td colspan="8" class="text-center text-muted py-4">Sin registros</td></tr>
+        <?php endif; ?>
         </tbody>
       </table>
     </div>
