@@ -158,7 +158,7 @@ include 'includes/header.php';
     </div>
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table id="tablaPersonas" class="table table-hover mb-0">
+    <table id="tablaPersonas" class="table table-hover mb-0 dt-export" data-title="Listado de Personas">
         <thead>
             <tr><th>ID</th><th>RUT</th><th>Nombres</th><th>Apellidos</th><th>Teléfono</th><th>Email</th><th>Género</th><th>Estado</th><th>Acciones</th></tr>
         </thead>

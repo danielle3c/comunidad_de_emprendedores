@@ -162,7 +162,7 @@ include __DIR__ . '/includes/header.php';
 
   <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-hover mb-0">
+      <table class="table table-hover mb-0 dt-export" data-title="Listado de Tarjetas de Presentación">
         <thead>
           <tr>
             <th>ID</th>

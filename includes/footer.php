@@ -254,30 +254,53 @@ document.addEventListener('DOMContentLoaded',function(){
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
+
+<!-- DataTables + Buttons + PDF (genérico para listados) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Solo inicializa si existe la tabla de personas
-  if (window.jQuery && jQuery('#tablaPersonas').length) {
-    jQuery('#tablaPersonas').DataTable({
+  if (!window.jQuery) return;
+
+  // Inicializar DataTables en cualquier tabla marcada con .dt-export
+  jQuery('table.dt-export').each(function(){
+    const $t = jQuery(this);
+    const title = $t.data('title') || 'Listado';
+
+    // evitar doble init
+    if (jQuery.fn.dataTable.isDataTable(this)) return;
+
+    $t.DataTable({
       dom: 'Bfrtip',
       pageLength: 15,
       buttons: [
         {
           extend: 'pdfHtml5',
           text: 'Exportar PDF',
-          title: 'Listado de Personas',
-          exportOptions: { columns: [0,1,2,3,4,5,6,7] }
+          title: title,
+          exportOptions: { columns: ':visible:not(:last-child)' }
         },
         {
           extend: 'print',
           text: 'Imprimir',
-          title: 'Listado de Personas',
-          exportOptions: { columns: [0,1,2,3,4,5,6,7] }
+          title: title,
+          exportOptions: { columns: ':visible:not(:last-child)' }
         }
       ],
       language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' }
     });
-  }
+  });
 });
 </script>
 

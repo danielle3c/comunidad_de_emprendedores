@@ -137,7 +137,7 @@ include 'includes/header.php';
 </div>
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-hover mb-0">
+    <table class="table table-hover mb-0 dt-export" data-title="Listado de Jornadas">
         <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Horario</th><th>Lugar</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>

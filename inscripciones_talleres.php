@@ -152,7 +152,7 @@ include 'includes/header.php';
 </div>
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-hover mb-0">
+    <table class="table table-hover mb-0 dt-export" data-title="Listado de Inscripciones a Talleres">
         <thead><tr><th>ID</th><th>Emprendedor</th><th>Taller</th><th>Fecha Taller</th><th>Inscripción</th><th>Asistió</th><th>Calificación</th><th>Acciones</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>

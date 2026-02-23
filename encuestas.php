@@ -127,7 +127,7 @@ include 'includes/header.php';
 </div>
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-hover mb-0">
+    <table class="table table-hover mb-0 dt-export" data-title="Listado de Encuestas">
         <thead><tr><th>ID</th><th>Emprendedor</th><th>Respuesta 1</th><th>Respuesta 2</th><th>Respuesta 3</th><th>Observaciones</th><th>Fecha</th><th>Acciones</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>

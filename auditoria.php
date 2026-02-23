@@ -67,7 +67,7 @@ include 'includes/header.php';
 </div>
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-hover table-sm mb-0">
+    <table class="table table-hover table-sm mb-0 dt-export" data-title="Listado de Auditoría">
         <thead><tr><th>ID</th><th>Fecha/Hora</th><th>Usuario</th><th>Acción</th><th>Tabla</th><th>Registro ID</th><th>Descripción</th><th>IP</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>

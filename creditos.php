@@ -156,7 +156,7 @@ include 'includes/header.php';
 </div>
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-hover mb-0">
+    <table class="table table-hover mb-0 dt-export" data-title="Listado de Créditos">
         <thead><tr><th>ID</th><th>Emprendedor</th><th>Monto Inicial</th><th>Saldo Inicial</th><th>Cuota</th><th>Inicio</th><th>Día Pago</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>
