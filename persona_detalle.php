@@ -3,6 +3,18 @@ require_once 'includes/auth_guard.php';
 require_once 'includes/helpers.php';
 
 $pdo = getConnection();
+
+
+// Helper: obtener la primera columna existente (para evitar errores por nombres distintos)
+function firstExistingColumn(PDO $pdo, string $table, array $candidates): ?string {
+    $stmt = $pdo->prepare("SHOW COLUMNS FROM `$table`");
+    $stmt->execute();
+    $cols = array_map(fn($r) => $r['Field'], $stmt->fetchAll(PDO::FETCH_ASSOC));
+    foreach ($candidates as $c) {
+        if (in_array($c, $cols, true)) return $c;
+    }
+    return null;
+}
 $id  = (int)($_GET['id'] ?? 0);
 if (!$id) redirect('personas.php');
 
@@ -68,18 +80,30 @@ if ($eid) {
 // ── ENCUESTAS (tabla: encuesta_2026) ─────────────────────────
 $encuestas = [];
 if ($eid) {
-    $stmt = $pdo->prepare("SELECT * FROM encuesta_2026 WHERE emprendedores_idemprendedores = ? ORDER BY fecha_respuesta DESC");
-    $stmt->execute([$eid]);
-    $encuestas = $stmt->fetchAll();
-}
+    $colEnc = firstExistingColumn($pdo, 'encuesta_2026', ['emprendedores_idemprendedores','emprendedores_idemprendedores']);
+    if ($colEnc) {
+        $stmt = $pdo->prepare("SELECT * FROM encuesta_2026 WHERE `$colEnc` = ? ORDER BY fecha_respuesta DESC");
+    } else {
+        $stmt = null;
+    }
+    if ($stmt) {
+        $stmt->execute([$eid]);
+        $encuestas = $stmt->fetchAll();
+    }}
 
 // ── DOCUMENTOS (tabla: documentos, FK: emprendedores_idemprendedores) ─
 $documentos = [];
 if ($eid) {
-    $stmt = $pdo->prepare("SELECT * FROM documentos WHERE emprendedores_idemprendedores = ? ORDER BY fecha_subida DESC");
-    $stmt->execute([$eid]);
-    $documentos = $stmt->fetchAll();
-}
+    $colDoc = firstExistingColumn($pdo, 'documentos', ['emprendedores_idemprendedores','emprendedores_idemprendedores']);
+    if ($colDoc) {
+        $stmt = $pdo->prepare("SELECT * FROM documentos WHERE `$colDoc` = ? ORDER BY fecha_subida DESC");
+    } else {
+        $stmt = null;
+    }
+    if ($stmt) {
+        $stmt->execute([$eid]);
+        $documentos = $stmt->fetchAll();
+    }}
 
 // ── TARJETAS (tabla: tarjetas_presentacion — sin FK a persona) ─
 // No tiene relación directa con personas en el esquema actual
