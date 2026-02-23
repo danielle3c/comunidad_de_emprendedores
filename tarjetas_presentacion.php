@@ -156,7 +156,9 @@ include __DIR__ . '/includes/header.php';
         <i class="bi bi-plus"></i> Nuevo
       </a>
     </div>
-  </div>
+  
+    <?php include __DIR__ . '/includes/print_button.php'; ?>
+</div>
 
   <div class="card-body p-0">
     <div class="table-responsive">

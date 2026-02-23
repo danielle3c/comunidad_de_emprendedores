@@ -152,7 +152,9 @@ include 'includes/header.php';
             </form>
             <a href="cobranzas.php?action=create<?= $creditoId ? "&credito_id=$creditoId" : '' ?>" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
         </div>
-    </div>
+    
+    <?php include __DIR__ . '/includes/print_button.php'; ?>
+</div>
     <div class="card-body p-0">
     <div class="table-responsive">
     <table class="table table-hover mb-0">

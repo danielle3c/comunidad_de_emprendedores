@@ -209,7 +209,9 @@ include __DIR__ . '/includes/header.php';
     <a href="documentos.php?action=create" class="btn btn-primary btn-sm">
       <i class="bi bi-plus"></i> Subir
     </a>
-  </div>
+  
+    <?php include __DIR__ . '/includes/print_button.php'; ?>
+</div>
 
   <div class="card-body p-0">
     <div class="table-responsive">

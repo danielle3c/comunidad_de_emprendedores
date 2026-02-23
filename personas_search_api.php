@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/security.php';
-require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/includes/security.php';
+require_once __DIR__ . '/includes/helpers.php';
 
 secure_session_start();
 

@@ -62,7 +62,9 @@ include 'includes/header.php';
                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Limpiar todo</button>
             </form>
         </div>
-    </div>
+    
+    <?php include __DIR__ . '/includes/print_button.php'; ?>
+</div>
     <div class="card-body p-0">
     <div class="table-responsive">
     <table class="table table-hover table-sm mb-0">
