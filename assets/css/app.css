@@ -1,6 +1,6 @@
 /* ============================================================
-   app.css — Corporación de Fomento La Granja
-   Tema dinámico: modo oscuro/claro + color RGB personalizable
+app.css — Corporación de Fomento La Granja
+ema dinámico: modo oscuro/claro + color RGB personalizable
    ============================================================ */
 
 /* ---- Variables base ---- */
@@ -16,7 +16,7 @@
   --radius-sm: 10px;
 }
 
-/* ---- MODO OSCURO (default) ---- */
+/* ---- MODO OSCURO ---- */
 [data-theme="dark"], :root {
   --bg:        #080e08;
   --bg2:       #0d160d;
@@ -66,7 +66,7 @@ a { text-decoration: none; color: inherit; }
 hr { opacity: .12; border-color: var(--brand-pick); }
 
 /* ============================================================
-   FONDO ANIMADO (gradiente radial + hexágonos)
+FONDO ANIMADO (gradiente radial + hexágonos)
    ============================================================ */
 .bg-canvas {
   position: fixed;
@@ -98,7 +98,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 [data-theme="light"] .bg-canvas .hex-svg { opacity: .05; }
 
 /* ============================================================
-   LAYOUT
+LAYOUT
    ============================================================ */
 .d-flex { display: flex; }
 .flex-grow-1 { flex: 1 1 0%; }
@@ -130,7 +130,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 
 /* ============================================================
-   SIDEBAR INTERNA
+SIDEBAR INTERNA
    ============================================================ */
 .sidebar .brand {
   padding: 1.15rem 1rem;
@@ -258,7 +258,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 
 /* ============================================================
-   CONTROLES FLOTANTES (tema / color / brillo / PDF / idioma)
+CONTROLES FLOTANTES (tema / color / brillo / PDF / idioma)
    ============================================================ */
 .sys-controls {
   position: fixed;
@@ -322,7 +322,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 .lang-select option { background: var(--bg); }
 
 /* ============================================================
-   BARRA VERTICAL DE BRILLO
+BARRA VERTICAL DE BRILLO
    ============================================================ */
 .brightness-rail {
   position: fixed;
@@ -382,7 +382,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 .brightness-rail input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
 
 /* ============================================================
-   TOPBAR
+TOPBAR
    ============================================================ */
 .topbar {
   position: sticky;
@@ -395,12 +395,12 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 
 /* ============================================================
-   CONTENT AREA
+CONTENT AREA
    ============================================================ */
 .content-area { padding: 1.2rem 1.2rem 1.2rem 4rem; }
 
 /* ============================================================
-   CARDS
+CARDS
    ============================================================ */
 .card {
   background: var(--surface);
@@ -434,7 +434,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 
 /* ============================================================
-   TABLAS
+TABLAS
    ============================================================ */
 .table { color: var(--text); }
 .table thead th {
@@ -458,7 +458,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 .table-responsive { border-radius: 0 0 var(--radius) var(--radius); }
 
 /* ============================================================
-   FORMULARIOS / BOTONES
+FORMULARIOS / BOTONES
    ============================================================ */
 .form-control,
 .form-select,
@@ -534,7 +534,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 .btn-action { padding: .25rem .48rem !important; line-height: 1; }
 
 /* ============================================================
-   BADGES
+BADGES
    ============================================================ */
 .badge { border-radius: 999px; padding: .38em .72em; font-weight: 700; font-size: .72rem; letter-spacing: .04em; }
 .bg-success   { background: rgba(22,163,74,.22) !important;  color: #4ade80 !important; border: 1px solid rgba(22,163,74,.3); }
@@ -552,7 +552,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 [data-theme="light"] .bg-secondary { background: rgba(100,116,139,.10) !important; color: #475569 !important; }
 
 /* ============================================================
-   ALERTS (flash messages)
+ALERTS (flash messages)
    ============================================================ */
 .alert {
   border-radius: var(--radius) !important;
@@ -574,7 +574,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 [data-theme="light"] .alert-danger  { color: #dc2626 !important; }
 
 /* ============================================================
-   PAGINACIÓN
+PAGINACIÓN
    ============================================================ */
 .pagination { gap: 3px; }
 .page-link {
@@ -594,9 +594,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 .page-link:hover { border-color: var(--brand-pick) !important; color: var(--brand-pick) !important; }
 
-/* ============================================================
-   SMART SEARCH DROPDOWN
-   ============================================================ */
+
 #smartResults { border-radius: var(--radius) !important; overflow: hidden; }
 #smartResults .list-group-item {
   background: var(--surface) !important;
@@ -607,9 +605,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 #smartResults .list-group-item:hover { background: var(--surface2) !important; }
 
-/* ============================================================
-   TOAST GLOBAL
-   ============================================================ */
+
 .sys-toast {
   position: fixed;
   bottom: 1.5rem;
@@ -631,9 +627,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 }
 .sys-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ============================================================
-   PRINT / PDF
-   ============================================================ */
+
 @media print {
   .sys-controls, .brightness-rail, .bg-canvas,
   .sidebar, .topbar .input-group, .lang-select,
