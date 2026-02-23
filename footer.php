@@ -160,19 +160,26 @@ document.addEventListener('DOMContentLoaded',function(){
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
       .then(function(response){
-        // Si la sesión expiró el API devuelve 401 (nunca redirect)
         if(response.status === 401){
           results.innerHTML = '<a href="login.php" class="list-group-item list-group-item-action text-warning"><i class="bi bi-lock me-2"></i>Sesión expirada — clic para iniciar sesión</a>';
+          results.style.display = 'block';
           return null;
         }
-        if(!response.ok){
-          results.innerHTML = '<div class="list-group-item text-danger" style="font-size:.82rem"><i class="bi bi-exclamation-triangle me-2"></i>Error del servidor ('+response.status+')</div>';
-          return null;
-        }
-        return response.json();
+        // Leer el JSON sin importar el status code (puede ser 500 con JSON de diagnóstico)
+        return response.json().then(function(json){ return {status: response.status, data: json}; });
       })
-      .then(function(data){
-        if(data === null) return; // Ya manejado arriba
+      .then(function(result){
+        if(result === null) return;
+        var status = result.status;
+        var data   = result.data;
+
+        // Error con mensaje del servidor
+        if(status !== 200 && data && data.error){
+          var msg = data.detalle || data.mensaje || data.error;
+          results.innerHTML = '<div class="list-group-item text-danger" style="font-size:.8rem"><i class="bi bi-exclamation-triangle me-1"></i><strong>Error DB:</strong> '+escHtml(msg)+'</div>';
+          results.style.display = 'block';
+          return;
+        }
 
         if(!Array.isArray(data) || data.length === 0){
           results.innerHTML = '<div class="list-group-item text-muted" style="font-size:.82rem"><i class="bi bi-search me-2"></i>Sin resultados para "'+escHtml(q)+'"</div>';
@@ -181,13 +188,19 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         results.innerHTML = data.map(function(p){
-          var badges =
-            (p.contrato_activo ? '<span class="badge bg-success ms-1">Contrato</span>' : '') +
-            (p.credito_activo  ? '<span class="badge bg-primary ms-1">Crédito</span>'  : '') +
-            (p.talleres        ? '<span class="badge bg-info ms-1">Talleres</span>'     : '');
-          return '<a href="persona_detalle.php?id='+p.id+'" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2">'
-            + '<span><strong>'+escHtml(p.nombre)+'</strong><small class="text-muted ms-2">'+escHtml(p.rut)+'</small></span>'
-            + '<span>'+badges+'</span></a>';
+          var badges = '';
+          if(p.es_emprendedor)  badges += '<span class="badge bg-light ms-1" style="color:var(--text2);font-size:.65rem">Emprend.</span>';
+          if(p.contrato_activo) badges += '<span class="badge bg-success ms-1" style="font-size:.65rem">Contrato</span>';
+          if(p.credito_activo)  badges += '<span class="badge bg-primary ms-1" style="font-size:.65rem">Crédito</span>';
+          if(p.talleres)        badges += '<span class="badge bg-info ms-1" style="font-size:.65rem">Talleres</span>';
+          if(p.tiene_pagos)     badges += '<span class="badge bg-warning ms-1" style="font-size:.65rem">Pagos</span>';
+          var sub = p.telefono ? '<i class="bi bi-telephone" style="font-size:.7rem;opacity:.6"></i> '+escHtml(p.telefono)+' ' : '';
+          sub    += p.email    ? '<i class="bi bi-envelope"  style="font-size:.7rem;opacity:.6"></i> '+escHtml(p.email)    : '';
+          return '<a href="persona_detalle.php?id='+p.id+'" class="list-group-item list-group-item-action py-2">'
+            + '<div class="d-flex justify-content-between align-items-start">'
+            + '<div><strong>'+escHtml(p.nombre)+'</strong><small class="text-muted ms-2">'+escHtml(p.rut)+'</small>'
+            + (sub ? '<br><small class="text-muted" style="font-size:.72rem">'+sub+'</small>' : '')
+            + '</div><div class="d-flex flex-wrap gap-1 ms-2">'+badges+'</div></div></a>';
         }).join('');
         results.style.display = 'block';
       })
