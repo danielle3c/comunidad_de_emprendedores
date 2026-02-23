@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(!input || !results) return;
 
   // Leer la ruta desde el atributo data-api (calculado por PHP en header.php)
-  var apiUrl = input.dataset.api || 'includes/personas_search_api.php';
+  var apiUrl = input.dataset.api || 'includes/search_global_api.php';
 
   var timer;
 

@@ -18,7 +18,7 @@ if (!defined('FROM_LAYOUT')):
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 
 </head>
-<body>
+<body class="hide-local-search">
 
 <!-- Fondo animado -->
 <!-- ===== CONTROLES FLOTANTES ===== -->
@@ -35,7 +35,7 @@ if (!defined('FROM_LAYOUT')):
 $_searchApiUrl = rtrim(
     str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])),
     '/'
-) . '/includes/personas_search_api.php';
+) . '/includes/search_global_api.php';
 ?>
     <!-- TOPBAR -->
     <div class="topbar">

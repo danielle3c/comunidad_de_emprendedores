@@ -13,7 +13,7 @@ if (!defined('FROM_LAYOUT')):
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/app.css" rel="stylesheet">
 </head>
-<body>
+<body class="hide-local-search">
 
 <!-- Fondo animado -->
 <!-- ===== CONTROLES FLOTANTES ===== -->
@@ -30,7 +30,7 @@ if (!defined('FROM_LAYOUT')):
 $_searchApiUrl = rtrim(
     str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])),
     '/'
-) . '/includes/personas_search_api.php';
+) . '/includes/search_global_api.php';
 ?>
     <!-- TOPBAR -->
     <div class="topbar">

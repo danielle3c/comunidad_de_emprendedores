@@ -140,11 +140,13 @@ include 'includes/header.php';
     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
         <span class="fw-semibold">Inscripciones <span class="badge bg-secondary"><?= $total ?></span></span>
         <div class="d-flex gap-2">
-            <form class="d-flex gap-2" method="GET">
+            <div class="local-search-block">
+<form class="d-flex gap-2" method="GET">
                 <?php if ($tallerId): ?><input type="hidden" name="taller_id" value="<?= $tallerId ?>"><?php endif; ?>
                 <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
                 <button class="btn btn-sm btn-outline-secondary">Buscar</button>
             </form>
+</div>
             <a href="inscripciones_talleres.php?action=create<?= $tallerId ? "&taller_id=$tallerId" : '' ?>" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nueva</a>
         </div>
     

@@ -650,3 +650,7 @@ hr { opacity: .12; border-color: var(--brand-pick); }
 
 /* ==== OVERRIDES: Controles desactivados por solicitud ==== */
 .sys-controls, .brightness-rail, .bg-canvas { display: none !important; }
+
+
+/* Oculta buscador local cuando se usa la barra global */
+.hide-local-search .local-search-block{display:none !important;}

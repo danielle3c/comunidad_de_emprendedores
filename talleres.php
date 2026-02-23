@@ -137,7 +137,8 @@ include 'includes/header.php';
     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
         <span class="fw-semibold">Talleres <span class="badge bg-secondary"><?= $total ?></span></span>
         <div class="d-flex gap-2 flex-wrap">
-            <form class="d-flex gap-2" method="GET">
+            <div class="local-search-block">
+<form class="d-flex gap-2" method="GET">
                 <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
                 <select name="estado" class="form-select form-select-sm" style="width:130px">
                     <option value="">Todos</option>
@@ -147,6 +148,7 @@ include 'includes/header.php';
                 </select>
                 <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
             </form>
+</div>
             <a href="talleres.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
         </div>
     

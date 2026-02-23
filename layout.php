@@ -14,7 +14,7 @@ if (!function_exists('getFlash')) require_once __DIR__ . '/includes/helpers.php'
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/app.css" rel="stylesheet">
 </head>
-<body>
+<body class="hide-local-search">
 
 <!-- Fondo hexagonal -->
 <!-- Controles flotantes -->

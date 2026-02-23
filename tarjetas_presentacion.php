@@ -146,11 +146,13 @@ include __DIR__ . '/includes/header.php';
     </span>
 
     <div class="d-flex gap-2">
-      <form class="d-flex gap-2" method="GET">
+      <div class="local-search-block">
+<form class="d-flex gap-2" method="GET">
         <input type="text" name="search" class="form-control form-control-sm"
                placeholder="Buscar por nombre..." value="<?= htmlspecialchars($search) ?>">
         <button class="btn btn-sm btn-outline-secondary">Buscar</button>
       </form>
+</div>
 
       <a href="tarjetas_presentacion.php?action=create" class="btn btn-primary btn-sm">
         <i class="bi bi-plus"></i> Nuevo

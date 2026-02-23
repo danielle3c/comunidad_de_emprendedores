@@ -46,7 +46,8 @@ include 'includes/header.php';
     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
         <span class="fw-semibold">Log de Auditoría <span class="badge bg-secondary"><?= $total ?></span></span>
         <div class="d-flex gap-2 flex-wrap">
-            <form class="d-flex gap-2" method="GET">
+            <div class="local-search-block">
+<form class="d-flex gap-2" method="GET">
                 <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar acción..." value="<?= $search ?>">
                 <input type="text" name="usuario" class="form-control form-control-sm" placeholder="Usuario..." value="<?= $filtroUsuario ?>" style="width:120px">
                 <select name="tabla" class="form-select form-select-sm" style="width:130px">
@@ -57,6 +58,7 @@ include 'includes/header.php';
                 </select>
                 <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
             </form>
+</div>
             <form method="POST" action="auditoria.php" class="d-inline" onsubmit="return confirm('¿Limpiar toda la auditoría? Esta acción no se puede deshacer.')">
                 <input type="hidden" name="action" value="clear">
                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Limpiar todo</button>

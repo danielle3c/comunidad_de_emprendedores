@@ -19,7 +19,7 @@ require_once __DIR__ . '/helpers.php';
   <!-- CSS del sistema (en raíz) -->
   <link href="app.css" rel="stylesheet">
 </head>
-<body>
+<body class="hide-local-search">
 
 <div class="sys-toast" id="sysToast"></div>
 

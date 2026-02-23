@@ -135,10 +135,12 @@ include 'includes/header.php';
     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
         <span class="fw-semibold">Emprendedores <span class="badge bg-secondary"><?= $total ?></span></span>
         <div class="d-flex gap-2">
-            <form class="d-flex gap-2" method="GET">
+            <div class="local-search-block">
+<form class="d-flex gap-2" method="GET">
                 <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
                 <button class="btn btn-sm btn-outline-secondary">Buscar</button>
             </form>
+</div>
             <a href="emprendedores.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
         </div>
     
