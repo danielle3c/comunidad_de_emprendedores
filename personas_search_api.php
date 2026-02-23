@@ -22,19 +22,21 @@ try {
     $pdo   = getConnection();
     $qLike = '%' . $q . '%';
 
-    // PASO 1: buscar personas — SQL simple sin subqueries, cero problemas de parámetros
+    // PASO 1: buscar personas (4 params posicionales, sin subqueries)
     $stmt = $pdo->prepare("
-        SELECT idpersonas AS id, rut,
+        SELECT idpersonas AS id,
+               rut,
                CONCAT(nombres, ' ', apellidos) AS nombre,
-               telefono, email
+               telefono,
+               email
         FROM   personas
         WHERE  estado = 1
-          AND  (rut     LIKE ?
-            OR  nombres LIKE ?
+          AND  (rut      LIKE ?
+            OR  nombres  LIKE ?
             OR  apellidos LIKE ?
-            OR  CONCAT(nombres,' ',apellidos) LIKE ?)
-        ORDER BY apellidos, nombres
-        LIMIT 10
+            OR  CONCAT(nombres, ' ', apellidos) LIKE ?)
+        ORDER  BY apellidos, nombres
+        LIMIT  10
     ");
     $stmt->execute([$qLike, $qLike, $qLike, $qLike]);
     $personas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -44,16 +46,15 @@ try {
         exit;
     }
 
-    // PASO 2: para cada persona, buscar badges con queries simples separadas
-    // Así evitamos TODOS los problemas de parámetros en subqueries
+    // PASO 2: badges con queries separadas (un solo ? cada una — imposible HY093)
     $out = [];
     foreach ($personas as $p) {
         $pid = (int)$p['id'];
 
-        // ¿Es emprendedor?
+        // ¿Tiene emprendedor?
         $s = $pdo->prepare("SELECT idemprendedores FROM emprendedores WHERE personas_idpersonas = ? LIMIT 1");
         $s->execute([$pid]);
-        $emp = $s->fetch();
+        $emp = $s->fetch(PDO::FETCH_ASSOC);
         $eid = $emp ? (int)$emp['idemprendedores'] : null;
 
         $contrato = false;
@@ -62,26 +63,26 @@ try {
         $pagos    = false;
 
         if ($eid) {
-            // ¿Contrato activo?
+            // Contrato activo (tabla: Contratos, PK: idContratos, FK: emprendedores_idemprendedores)
             $s = $pdo->prepare("SELECT 1 FROM Contratos WHERE emprendedores_idemprendedores = ? AND estado = 'Activo' LIMIT 1");
             $s->execute([$eid]);
             $contrato = (bool)$s->fetchColumn();
 
-            // ¿Crédito activo?
+            // Crédito activo (tabla: creditos, PK: idcreditos, FK: emprendedores_idemprendedores)
             $s = $pdo->prepare("SELECT idcreditos FROM creditos WHERE emprendedores_idemprendedores = ? AND estado = 'Activo' LIMIT 1");
             $s->execute([$eid]);
-            $cred_row = $s->fetch();
-            $credito  = (bool)$cred_row;
+            $cred = $s->fetch(PDO::FETCH_ASSOC);
+            $credito = (bool)$cred;
 
-            // ¿Talleres?
+            // Talleres (tabla: inscripciones_talleres, FK: emprendedores_idemprendedores)
             $s = $pdo->prepare("SELECT 1 FROM inscripciones_talleres WHERE emprendedores_idemprendedores = ? LIMIT 1");
             $s->execute([$eid]);
             $talleres = (bool)$s->fetchColumn();
 
-            // ¿Pagos? — solo si tiene crédito
-            if ($cred_row) {
+            // Pagos (tabla: cobranzas, FK: creditos_idcreditos)
+            if ($cred) {
                 $s = $pdo->prepare("SELECT 1 FROM cobranzas WHERE creditos_idcreditos = ? LIMIT 1");
-                $s->execute([$cred_row['idcreditos']]);
+                $s->execute([$cred['idcreditos']]);
                 $pagos = (bool)$s->fetchColumn();
             }
         }
