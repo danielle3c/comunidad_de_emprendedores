@@ -29,9 +29,7 @@ ob_start();
         <?php foreach ($rows as $r): ?>
           <tr><td><?= htmlspecialchars((string)($r['idinscripcion'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['emprendedores_idemprendedores'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['talleres_idtalleres'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['fecha_inscripcion'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['asistio'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="5" class="text-center text-muted py-4">Sin registros</td></tr>
-        <?php endif; ?>
+        
         </tbody>
       </table>
     </div>

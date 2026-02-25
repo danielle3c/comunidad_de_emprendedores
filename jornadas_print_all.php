@@ -29,9 +29,7 @@ ob_start();
         <?php foreach ($rows as $r): ?>
           <tr><td><?= htmlspecialchars((string)($r['idjornadas'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['nombre_jornada'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['fecha_jornada'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['hora_inicio'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['hora_fin'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['lugar'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['estado'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="7" class="text-center text-muted py-4">Sin registros</td></tr>
-        <?php endif; ?>
+        
         </tbody>
       </table>
     </div>

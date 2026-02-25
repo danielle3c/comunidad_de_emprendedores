@@ -29,9 +29,7 @@ ob_start();
         <?php foreach ($rows as $r): ?>
           <tr><td><?= htmlspecialchars((string)($r['idauditoria'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['usuario_id'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['accion'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['tabla'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['registro_id'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['ip_address'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['fecha_hora'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="7" class="text-center text-muted py-4">Sin registros</td></tr>
-        <?php endif; ?>
+        
         </tbody>
       </table>
     </div>

@@ -29,9 +29,7 @@ ob_start();
         <?php foreach ($rows as $r): ?>
           <tr><td><?= htmlspecialchars((string)($r['idUsuarios'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['nombre_usuario'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['email'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['rol'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['estado'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['created_at'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="6" class="text-center text-muted py-4">Sin registros</td></tr>
-        <?php endif; ?>
+        
         </tbody>
       </table>
     </div>

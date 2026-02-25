@@ -197,11 +197,7 @@ include __DIR__ . '/includes/header.php';
             </tr>
           <?php endforeach; ?>
 
-          <?php if (!$rows): ?>
-            <tr>
-              <td colspan="6" class="text-center text-muted py-4">Sin registros</td>
-            </tr>
-          <?php endif; ?>
+          
         </tbody>
       </table>
     </div>

@@ -21,7 +21,7 @@ unset($_SESSION['flash_error']);
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/css/app.css" rel="stylesheet">
+  <link href="app.css" rel="stylesheet">
   <style>
     body { display:flex; flex-direction:column; min-height:100vh; align-items:center; justify-content:center; padding:1rem 1rem 1rem 4rem; }
     .login-card {

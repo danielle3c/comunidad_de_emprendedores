@@ -11,7 +11,7 @@ if (!defined('FROM_LAYOUT')):
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/css/app.css" rel="stylesheet">
+  <link href="app.css" rel="stylesheet">
 
   <!-- DataTables (Export PDF/Print) -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
@@ -35,7 +35,7 @@ if (!defined('FROM_LAYOUT')):
 $_searchApiUrl = rtrim(
     str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])),
     '/'
-) . '/includes/search_global_api.php';
+) . '/search_global_api.php';
 ?>
     <!-- TOPBAR -->
     <div class="topbar">

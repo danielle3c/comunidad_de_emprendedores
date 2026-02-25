@@ -29,9 +29,7 @@ ob_start();
         <?php foreach ($rows as $r): ?>
           <tr><td><?= htmlspecialchars((string)($r['idcarritos'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['nombre_carrito'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['nombre_responsable'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['telefono_responsable'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['asistencia'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['fecha_registro'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['estado'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="7" class="text-center text-muted py-4">Sin registros</td></tr>
-        <?php endif; ?>
+        
         </tbody>
       </table>
     </div>

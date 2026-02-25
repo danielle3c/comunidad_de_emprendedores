@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
           exportOptions: { columns: ':visible:not(:last-child)' }
         }
       ],
-      language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' }
+      language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json', emptyTable: 'Sin registros' }
     });
   });
 });

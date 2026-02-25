@@ -29,9 +29,7 @@ ob_start();
         <?php foreach ($rows as $r): ?>
           <tr><td><?= htmlspecialchars((string)($r['idcreditos'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['emprendedores_idemprendedores'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['monto_inicial'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['saldo_inicial'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['fecha_inicio'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['cuota_mensual'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['estado'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="7" class="text-center text-muted py-4">Sin registros</td></tr>
-        <?php endif; ?>
+        
         </tbody>
       </table>
     </div>
