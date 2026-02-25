@@ -20,9 +20,9 @@ if ($username === '' || $password === '') {
 }
 
 $stmt = $pdo->prepare("SELECT idUsuarios, nombre_usuario, password, rol, estado
-                       FROM usuarios
-                       WHERE nombre_usuario = :u
-                       LIMIT 1");
+                    FROM usuarios
+                    WHERE nombre_usuario = :u
+                    LIMIT 1");
 $stmt->execute([':u' => $username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

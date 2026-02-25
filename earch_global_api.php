@@ -28,7 +28,7 @@ try {
   // =========================
   $stmt = $pdo->prepare("
     SELECT idpersonas AS id, rut,
-           CONCAT(nombres,' ',apellidos) AS titulo
+          CONCAT(nombres,' ',apellidos) AS titulo
     FROM personas
     WHERE estado = 1
       AND (rut LIKE ? OR nombres LIKE ? OR apellidos LIKE ? OR email LIKE ?)
@@ -51,9 +51,9 @@ try {
   // =========================
   $stmt = $pdo->prepare("
     SELECT idcarritos AS id,
-           nombre_carrito,
-           nombre_responsable,
-           telefono_responsable
+          nombre_carrito,
+          nombre_responsable,
+          telefono_responsable
     FROM carritos
     WHERE estado = 1
       AND (nombre_carrito LIKE ? OR nombre_responsable LIKE ? OR telefono_responsable LIKE ?)

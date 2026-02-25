@@ -6,7 +6,7 @@ $pageTitle = 'Dashboard';
 $pdo = getConnection();
 
 /* ===============================
-   ESTADÍSTICAS PRINCIPALES
+ESTADÍSTICAS PRINCIPALES
 ================================ */
 
 $stats = [
@@ -36,7 +36,7 @@ try {
     // columna correcta es fecha_hora (no fecha_pago)
     $ultimosPagos = $pdo->query("
         SELECT c.monto, c.fecha_hora,
-               CONCAT(p.nombres,' ',p.apellidos) AS nombre_persona
+            CONCAT(p.nombres,' ',p.apellidos) AS nombre_persona
         FROM cobranzas c
         JOIN creditos cr ON c.creditos_idcreditos = cr.idcreditos
         JOIN emprendedores e ON cr.emprendedores_idemprendedores = e.idemprendedores
@@ -50,7 +50,7 @@ try {
         SELECT nombre_taller, fecha_taller, lugar
         FROM talleres
         WHERE fecha_taller >= CURDATE()
-          AND estado NOT IN ('Finalizado','Cancelado')
+        AND estado NOT IN ('Finalizado','Cancelado')
         ORDER BY fecha_taller ASC
         LIMIT 5
     ")->fetchAll(PDO::FETCH_ASSOC);

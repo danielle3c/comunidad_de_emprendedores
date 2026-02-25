@@ -167,19 +167,19 @@ include __DIR__ . '/includes/header.php';
         <div class="col-md-5">
           <label class="form-label">Nombre del Documento *</label>
           <input type="text" name="nombre_documento" class="form-control form-control-sm"
-                 value="<?= htmlspecialchars($edit['nombre_documento'] ?? '') ?>" required>
+                value="<?= htmlspecialchars($edit['nombre_documento'] ?? '') ?>" required>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Tipo</label>
           <input type="text" name="tipo_documento" class="form-control form-control-sm"
-                 value="<?= htmlspecialchars($edit['tipo_documento'] ?? '') ?>" placeholder="Contrato, Foto, etc.">
+                value="<?= htmlspecialchars($edit['tipo_documento'] ?? '') ?>" placeholder="Contrato, Foto, etc.">
         </div>
 
         <div class="col-md-6">
           <label class="form-label">Archivo <?= $action === 'edit' ? '(opcional)' : '*' ?></label>
           <input type="file" name="archivo" class="form-control form-control-sm"
-                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.csv" <?= $action === 'create' ? 'required' : '' ?>>
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.csv" <?= $action === 'create' ? 'required' : '' ?>>
 
           <?php if ($action === 'edit' && !empty($edit['ruta_archivo'])): ?>
             <small class="text-muted">
@@ -247,8 +247,8 @@ include __DIR__ . '/includes/header.php';
                 </a>
 
                 <a href="documentos.php?action=delete&id=<?= (int)$r['iddocumentos'] ?>"
-                   onclick="return confirm('¿Eliminar este documento?');"
-                   class="btn btn-sm btn-outline-danger">
+                  onclick="return confirm('¿Eliminar este documento?');"
+                  class="btn btn-sm btn-outline-danger">
                   <i class="bi bi-trash"></i>
                 </a>
               </td>

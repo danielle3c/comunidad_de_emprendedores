@@ -44,11 +44,11 @@ $_searchApiUrl = rtrim(
           <div class="input-group input-group-sm">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
             <input id="smartSearch" type="text" class="form-control"
-                   placeholder="Buscar persona por RUT o nombre..." autocomplete="off"
-                   data-api="<?= htmlspecialchars($_searchApiUrl, ENT_QUOTES, 'UTF-8') ?>">
+                  placeholder="Buscar persona por RUT o nombre..." autocomplete="off"
+                  data-api="<?= htmlspecialchars($_searchApiUrl, ENT_QUOTES, 'UTF-8') ?>">
           </div>
           <div id="smartResults" class="list-group position-absolute w-100 mt-1 shadow"
-               style="z-index:9999;display:none;max-height:320px;overflow:auto;border-radius:12px"></div>
+              style="z-index:9999;display:none;max-height:320px;overflow:auto;border-radius:12px"></div>
         </div>
 
         <span class="text-muted" style="font-size:.78rem;white-space:nowrap">

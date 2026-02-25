@@ -26,22 +26,22 @@ try {
         "SELECT idpersonas AS id, rut,
                 CONCAT(nombres, ' ', apellidos) AS nombre,
                 telefono, email
-         FROM personas
-         WHERE estado = 1 AND rut LIKE ?
-         UNION
-         SELECT idpersonas AS id, rut,
+        FROM personas
+        WHERE estado = 1 AND rut LIKE ?
+        UNION
+        SELECT idpersonas AS id, rut,
                 CONCAT(nombres, ' ', apellidos) AS nombre,
                 telefono, email
-         FROM personas
-         WHERE estado = 1 AND nombres LIKE ?
-         UNION
-         SELECT idpersonas AS id, rut,
+        FROM personas
+        WHERE estado = 1 AND nombres LIKE ?
+        UNION
+        SELECT idpersonas AS id, rut,
                 CONCAT(nombres, ' ', apellidos) AS nombre,
                 telefono, email
-         FROM personas
-         WHERE estado = 1 AND apellidos LIKE ?
-         ORDER BY nombre
-         LIMIT 10"
+        FROM personas
+        WHERE estado = 1 AND apellidos LIKE ?
+        ORDER BY nombre
+        LIMIT 10"
     );
     $stmt->execute([$qLike, $qLike, $qLike]);
     $personas = $stmt->fetchAll(PDO::FETCH_ASSOC);

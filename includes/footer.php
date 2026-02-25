@@ -125,11 +125,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
 
-/* ============================================================
-   SMART SEARCH — buscador inteligente de personas
-   La ruta al API se lee del atributo data-api del input,
-   generado por PHP con la ruta absoluta correcta.
-   ============================================================ */
+
 (function(){
   var input   = document.getElementById('smartSearch');
   var results = document.getElementById('smartResults');

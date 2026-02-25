@@ -14,15 +14,15 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="utf-8">
 <title>Diagnóstico Buscador</title>
 <style>
-  body { font-family: monospace; padding: 2rem; background: #0d1a0d; color: #e0f0e0; }
-  h2 { color: #43b02a; }
-  .ok   { color: #4ade80; }
-  .fail { color: #f87171; }
-  .warn { color: #fbbf24; }
-  pre  { background: #111; padding: 1rem; border-left: 3px solid #43b02a; white-space: pre-wrap; font-size: .85rem; }
-  table { border-collapse: collapse; width: 100%; margin: .5rem 0; }
-  th, td { border: 1px solid #2a4a2a; padding: .4rem .7rem; text-align: left; }
-  th { background: #1a3a1a; color: #43b02a; }
+body { font-family: monospace; padding: 2rem; background: #0d1a0d; color: #e0f0e0; }
+h2 { color: #43b02a; }
+.ok   { color: #4ade80; }
+.fail { color: #f87171; }
+.warn { color: #fbbf24; }
+pre  { background: #111; padding: 1rem; border-left: 3px solid #43b02a; white-space: pre-wrap; font-size: .85rem; }
+table { border-collapse: collapse; width: 100%; margin: .5rem 0; }
+th, td { border: 1px solid #2a4a2a; padding: .4rem .7rem; text-align: left; }
+th { background: #1a3a1a; color: #43b02a; }
 </style>
 </head>
 <body>
