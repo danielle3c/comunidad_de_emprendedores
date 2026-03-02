@@ -72,33 +72,23 @@ try {
   }
 
   // =========================
-  // TARJETAS DE PRESENTACIÓN
-  // =========================
-  $stmt = $pdo->prepare("
-    SELECT idtarjeta AS id, nombre, cantidad, valor
-    FROM tarjetas_presentacion
-    WHERE nombre LIKE ?
-    ORDER BY idtarjeta DESC
-    LIMIT 10
-  ");
-  $stmt->execute([$qLike]);
+// =========================
+// TARJETAS DE PRESENTACIÓN
+// =========================
+$stmt = $pdo->prepare("
+  SELECT idtarjeta AS id, nombre, cantidad
+  FROM tarjetas_presentacion
+  WHERE nombre LIKE ?
+  ORDER BY idtarjeta DESC
+  LIMIT 10
+");
+$stmt->execute([$qLike]);
 
-  foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $t) {
-    $out[] = [
-      'tipo'   => 'tarjeta',
-      'titulo' => ($t['nombre'] ?? '(Sin nombre)'),
-      'sub'    => 'Cant: ' . ($t['cantidad'] ?? '-') . ' | Valor: ' . ($t['valor'] ?? '-'),
-      'url'    => 'tarjetas_presentacion.php?action=edit&id=' . (int)$t['id'],
-    ];
-  }
-
-  // Limitar a 20 resultados mezclados
-  $out = array_slice($out, 0, 20);
-
-  echo json_encode($out, JSON_UNESCAPED_UNICODE);
-
-} catch (Throwable $e) {
-  error_log('[search_global_api] ' . $e->getMessage());
-  http_response_code(500);
-  echo json_encode(['error' => 'server_error', 'detalle' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $t) {
+  $out[] = [
+    'tipo'   => 'tarjeta',
+    'titulo' => ($t['nombre'] ?? '(Sin nombre)'),
+    'sub'    => 'Cant: ' . ($t['cantidad'] ?? '-'),
+    'url'    => 'tarjetas_presentacion.php?action=edit&id=' . (int)$t['id'],
+  ];
 }

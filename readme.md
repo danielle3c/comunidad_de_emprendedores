@@ -1,12 +1,12 @@
 
 
-# 📘 Sistema Comunidad de Emprendedores
+# Sistema Comunidad de Emprendedores
 
 **Corporación de Fomento La Granja**
 
 ---
 
-## 📌 Descripción General
+## Descripción General
 
 El **Sistema Comunidad de Emprendedores** es una plataforma web desarrollada en PHP y MySQL para la gestión integral de personas, emprendedores y actividades comunitarias.
 
@@ -14,7 +14,7 @@ Permite centralizar información administrativa, financiera y operativa en un so
 
 ---
 
-## 🎯 Objetivo del Sistema
+## Objetivo del Sistema
 
 El sistema permite:
 
@@ -31,34 +31,34 @@ El sistema permite:
 
 ---
 
-## 🧩 Módulos Principales
+## Módulos Principales
 
-### 👤 Personas
+### Personas
 
 * Registro, edición y eliminación.
 * Búsqueda avanzada.
 * Historial completo por persona.
 
-### 🏢 Emprendedores
+### Emprendedores
 
 * Asociación a personas.
 * Información de negocio y rubro.
 * Límite de crédito.
 
-### 💰 Finanzas
+### Finanzas
 
 * Contratos
 * Créditos
 * Cobranzas (pagos registrados)
 * Estado activo, vencido, cancelado.
 
-### 📚 Actividades
+### Actividades
 
 * Talleres
 * Inscripciones
 * Jornadas
 
-### 🛒 Carritos
+### Carritos
 
 * Registro de responsables
 * Control de asistencia
