@@ -1,5 +1,5 @@
 <?php 
-// 1. Cargar la librería PHPMailer (Asegúrate que la carpeta PHPMailer existe)
+// 1. Cargar la librería PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -12,14 +12,15 @@ include 'config.php';
 $mensaje = "";
 
 if (isset($_POST['verificar_correo'])) {
+    // Escapar el correo para evitar inyecciones básicas
     $correo = mysqli_real_escape_string($conexion, $_POST['correo']);
     
-    // Verificar si el email existe en la BD
-    $sql = "SELECT username FROM Usuarios WHERE email = '$correo' AND estado = 1";
+    // CORRECCIÓN: Se usa 'nombre_usuario' y 'activo' según tu estructura SQL
+    $sql = "SELECT nombre_usuario FROM Usuarios WHERE email = '$correo' AND activo = 1";
     $res = mysqli_query($conexion, $sql);
 
     if ($datos = mysqli_fetch_assoc($res)) {
-        $username = $datos['username'];
+        $username = $datos['nombre_usuario'];
         $mail = new PHPMailer(true);
 
         try {
@@ -27,8 +28,8 @@ if (isset($_POST['verificar_correo'])) {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com'; 
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'sofidany.figueroa@gmail.com';      // CAMBIA POR TU GMAIL
-            $mail->Password   = 'rgge ibmq dqjk kiub';      // CAMBIA POR TUS 16 LETRAS DE GOOGLE
+            $mail->Username   = 'sofidany.figueroa@gmail.com';      // Tu correo Gmail
+            $mail->Password   = 'rgge ibmq dqjk kiub';              // Tu contraseña de aplicación
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
@@ -42,7 +43,7 @@ if (isset($_POST['verificar_correo'])) {
             );
 
             // --- CONFIGURACIÓN DEL MENSAJE ---
-            $mail->setFrom('tu-correo@gmail.com', 'Sistema Comunidad');
+            $mail->setFrom('sofidany.figueroa@gmail.com', 'Sistema Comunidad');
             $mail->addAddress($correo); 
 
             $mail->isHTML(true);
@@ -63,14 +64,15 @@ if (isset($_POST['verificar_correo'])) {
 
             $mail->send();
             $mensaje = "<div style='color:green; background:#dcfce7; padding:15px; border-radius:8px; margin-bottom:20px;'>
-                        ¡Enviado! Revisa tu correo institucional ($correo).</div>";
+                        ¡Enviado! Revisa tu correo ($correo) para continuar.</div>";
 
         } catch (Exception $e) {
             $mensaje = "<div style='color:red; background:#fee2e2; padding:15px; border-radius:8px;'>
                         Error al enviar: {$mail->ErrorInfo}</div>";
         }
     } else {
-        $mensaje = "<p style='color:red;'> El correo no está registrado en el sistema.</p>";
+        $mensaje = "<div style='color:red; background:#fee2e2; padding:15px; border-radius:8px;'>
+                    El correo no está registrado o la cuenta está inactiva.</div>";
     }
 }
 ?>
@@ -79,13 +81,14 @@ if (isset($_POST['verificar_correo'])) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar Acceso</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 350px; text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { background: #55b83e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn:hover { background: #55b83e; }
+        .btn { background: #55b83e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #45a032; }
         a { color: #55b83e; text-decoration: none; font-size: 0.9em; display: block; margin-top: 15px; }
     </style>
 </head>
@@ -95,10 +98,10 @@ if (isset($_POST['verificar_correo'])) {
         
         <?php echo $mensaje; ?>
         
-        <?php if(!isset($_POST['verificar_correo']) || strpos($mensaje, 'no exsite') !== false): ?>
+        <?php if(!isset($_POST['verificar_correo']) || strpos($mensaje, 'Error') !== false): ?>
         <form method="POST">
             <p style="font-size: 0.9em; color: #666;">Ingresa tu correo para recibir un enlace de recuperación.</p>
-            <input type="email" name="correo" placeholder="tu-correo@empresa.cl" required>
+            <input type="email" name="correo" placeholder="tu-correo@ejemplo.com" required>
             <button type="submit" name="verificar_correo" class="btn">Enviar enlace</button>
         </form>
         <?php endif; ?>
