@@ -5,58 +5,55 @@ $pageTitle = 'Personas';
 $pdo = getConnection();
 
 $search = sanitize($_GET['search'] ?? '');
-$where = $search ? "WHERE p.nombres LIKE :s OR p.apellidos LIKE :s OR p.rut LIKE :s" : "";
-$params = $search ? [':s' => "%$search%"] : [];
 
-$stmt = $pdo->prepare("
-SELECT 
-    p.*,
-    CONCAT(p.nombres,' ',p.apellidos) AS nombre_completo,
-    a.accion,
-    a.descripcion,
-    a.fecha_hora
-FROM personas p
-LEFT JOIN auditoria a 
-    ON a.registro_id = p.idpersonas 
-    AND a.tabla = 'personas'
-$where
-ORDER BY p.idpersonas, a.fecha_hora DESC
-");
+if ($search) {
+    $stmt = $pdo->prepare("
+        SELECT 
+            p.idpersonas,
+            CONCAT(p.nombres,' ',p.apellidos) AS nombre,
+            p.rut
+        FROM personas p
+        WHERE p.nombres LIKE :s 
+           OR p.apellidos LIKE :s 
+           OR p.rut LIKE :s
+        ORDER BY p.nombres ASC
+    ");
+    $stmt->execute([':s' => "%$search%"]);
+} else {
+    $stmt = $pdo->prepare("
+        SELECT 
+            p.idpersonas,
+            CONCAT(p.nombres,' ',p.apellidos) AS nombre,
+            p.rut
+        FROM personas p
+        ORDER BY p.nombres ASC
+    ");
+    $stmt->execute();
+}
 
-foreach ($params as $k => $v) $stmt->bindValue($k, $v);
-$stmt->execute();
 $rows = $stmt->fetchAll();
 
+/* 🔥 AGRUPAR */
 $personasAgrupadas = [];
 
 foreach ($rows as $r) {
     $id = $r['idpersonas'];
 
-    if (!isset($personasAgrupadas[$id])) {
-        $personasAgrupadas[$id] = [
-            'nombre' => $r['nombre_completo'],
-            'rut' => $r['rut'],
-            'historial' => []
-        ];
-    }
-
-    if ($r['accion']) {
-        $personasAgrupadas[$id]['historial'][] = [
-            'accion' => $r['accion'],
-            'descripcion' => $r['descripcion'],
-            'fecha' => $r['fecha_hora']
-        ];
-    }
+    $personasAgrupadas[$id] = [
+        'nombre' => $r['nombre'],
+        'rut' => $r['rut'],
+        'historial' => [] // vacío por ahora
+    ];
 }
 ?>
 
-<!-- 🔍 BUSCADOR BONITO -->
+<!-- 🔍 BUSCADOR -->
 <div class="card mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div class="card-body d-flex flex-wrap gap-2">
 
-    <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
+    <form method="GET" class="d-flex gap-2">
 
-      <div class="input-group input-group-sm" style="max-width: 320px;">
+      <div class="input-group input-group-sm">
         <span class="input-group-text">🔍</span>
         <input 
           type="text" 
@@ -106,19 +103,7 @@ foreach ($rows as $r) {
 
 <tr id="historial-<?= $id ?>" style="display:none;">
 <td colspan="3">
-<?php if ($p['historial']): ?>
-<ul>
-<?php foreach ($p['historial'] as $h): ?>
-<li>
-<b><?= $h['accion'] ?></b> - 
-<?= $h['descripcion'] ?> 
-<small>(<?= $h['fecha'] ?>)</small>
-</li>
-<?php endforeach; ?>
-</ul>
-<?php else: ?>
-<i>Sin historial</i>
-<?php endif; ?>
+<i>Sin historial (aún no conectado)</i>
 </td>
 </tr>
 <?php endforeach; ?>
