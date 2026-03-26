@@ -13,12 +13,18 @@ if ($search) {
             CONCAT(p.nombres,' ',p.apellidos) AS nombre,
             p.rut
         FROM personas p
-        WHERE p.nombres LIKE :s 
-           OR p.apellidos LIKE :s 
-           OR p.rut LIKE :s
+        WHERE p.nombres LIKE ?
+           OR p.apellidos LIKE ?
+           OR p.rut LIKE ?
         ORDER BY p.nombres ASC
     ");
-    $stmt->execute([':s' => "%$search%"]);
+
+    $stmt->execute([
+        "%$search%",
+        "%$search%",
+        "%$search%"
+    ]);
+
 } else {
     $stmt = $pdo->prepare("
         SELECT 
@@ -28,23 +34,11 @@ if ($search) {
         FROM personas p
         ORDER BY p.nombres ASC
     ");
+
     $stmt->execute();
 }
 
-$rows = $stmt->fetchAll();
-
-/* 🔥 AGRUPAR */
-$personasAgrupadas = [];
-
-foreach ($rows as $r) {
-    $id = $r['idpersonas'];
-
-    $personasAgrupadas[$id] = [
-        'nombre' => $r['nombre'],
-        'rut' => $r['rut'],
-        'historial' => [] // vacío por ahora
-    ];
-}
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!-- 🔍 BUSCADOR -->
@@ -90,20 +84,20 @@ foreach ($rows as $r) {
 </thead>
 <tbody>
 
-<?php foreach ($personasAgrupadas as $id => $p): ?>
+<?php foreach ($rows as $r): ?>
 <tr>
-    <td><?= $p['nombre'] ?></td>
-    <td><?= $p['rut'] ?></td>
+    <td><?= htmlspecialchars($r['nombre']) ?></td>
+    <td><?= htmlspecialchars($r['rut']) ?></td>
     <td>
-        <button class="btn btn-sm btn-outline-primary" onclick="toggleHistorial(<?= $id ?>)">
+        <button class="btn btn-sm btn-outline-primary" onclick="toggleHistorial(<?= $r['idpersonas'] ?>)">
             Ver historial
         </button>
     </td>
 </tr>
 
-<tr id="historial-<?= $id ?>" style="display:none;">
+<tr id="historial-<?= $r['idpersonas'] ?>" style="display:none;">
 <td colspan="3">
-<i>Sin historial (aún no conectado)</i>
+<i>Sin historial aún</i>
 </td>
 </tr>
 <?php endforeach; ?>
