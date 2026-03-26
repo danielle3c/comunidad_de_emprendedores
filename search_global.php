@@ -97,8 +97,8 @@ try {
 
 } catch (Throwable $e) {
   http_response_code(500);
+  error_log('[search_global] ' . $e->getMessage());
   echo json_encode([
     'error' => 'server_error',
-    'message' => $e->getMessage(),
   ], JSON_UNESCAPED_UNICODE);
 }

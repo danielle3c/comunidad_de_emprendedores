@@ -254,8 +254,6 @@ include __DIR__ . '/includes/header.php';
               </td>
             </tr>
           <?php endforeach; ?>
-        <?php else: ?>
-          <tr><td colspan="6" class="text-center text-muted py-4">Sin documentos</td></tr>
         <?php endif; ?>
         </tbody>
       </table>

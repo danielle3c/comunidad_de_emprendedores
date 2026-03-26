@@ -112,7 +112,7 @@ Todos los módulos con tabla incluyen:
 
 ---
 
-## 🛠 Tecnologías Utilizadas
+##Tecnologías Utilizadas
 
 * PHP 8+
 * MySQL
@@ -124,7 +124,7 @@ Todos los módulos con tabla incluyen:
 
 ---
 
-## 🗄 Estructura de Base de Datos
+## Estructura de Base de Datos
 
 Base de datos:
 
@@ -157,15 +157,15 @@ Todas las relaciones usan:
 
 ---
 
-## 🚀 Instalación
+## Instalación
 
-### 1️⃣ Requisitos
+### Requisitos
 
 * XAMPP o servidor Apache
 * PHP 8 o superior
 * MySQL
 
-### 2️⃣ Pasos
+### 2️Pasos
 
 1. Copiar carpeta a:
 
@@ -195,7 +195,7 @@ http://localhost/comunidad_de_emprendedores/
 
 ---
 
-## 🔐 Seguridad
+## Seguridad
 
 El sistema incluye:
 
@@ -208,7 +208,7 @@ El sistema incluye:
 
 ---
 
-## 🎨 Tema Visual
+## Tema Visual
 
 El sistema utiliza:
 
@@ -220,13 +220,13 @@ El sistema utiliza:
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 
 Desarrollado como sistema de gestión comunitaria para la Corporación de Fomento La Granja.
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Uso interno institucional.
 
@@ -236,9 +236,9 @@ Uso interno institucional.
 
 Si quieres, puedo hacer también:
 
-* 📘 Manual de Usuario (separado)
-* 🛠 Manual Técnico con ERD
-* 📊 Documento académico formal
-* 📄 README estilo GitHub profesional con badges
-* 🗂 Documento Word listo para imprimir
+* Manual de Usuario (separado)
+* Manual Técnico con ERD
+* Documento académico formal
+* README estilo GitHub profesional con badges
+* Documento Word listo para imprimir
 

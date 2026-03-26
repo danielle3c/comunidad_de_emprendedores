@@ -931,12 +931,16 @@ hr {
 }
 
 
-/* ==== OVERRIDES: Controles desactivados por solicitud ==== */
+/* ==== OVERRIDES: Controles desactivados por solicitud ====
+   NOTA: Bloque comentado — estaba ocultando los controles de tema,
+   color y brillo, dejándolos completamente inaccesibles.
+   Descomentar solo si se desea ocultar intencionalmente.
 .sys-controls,
 .brightness-rail,
 .bg-canvas {
   display: none !important;
 }
+*/
 
 
 /* Oculta buscador local cuando se usa la barra global */

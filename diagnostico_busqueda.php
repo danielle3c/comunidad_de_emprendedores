@@ -4,7 +4,7 @@
 // Abrir en navegador: http://tu-servidor/proyecto/diagnostico_busqueda.php
 // BORRAR este archivo después de usarlo
 // ============================================================
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/database.php';
 
 header('Content-Type: text/html; charset=utf-8');
 ?>

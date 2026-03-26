@@ -168,7 +168,6 @@ include 'includes/header.php';
             </td>
         </tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?><tr><td colspan="8" class="text-center text-muted py-4">Sin usuarios</td></tr><?php endif; ?>
         </tbody>
     </table>
     </div>

@@ -80,7 +80,7 @@ if ($eid) {
 // ── ENCUESTAS (tabla: encuesta_2026) ─────────────────────────
 $encuestas = [];
 if ($eid) {
-    $colEnc = firstExistingColumn($pdo, 'encuesta_2026', ['emprendedores_idemprendedores','emprendedores_idemprendedores']);
+    $colEnc = firstExistingColumn($pdo, 'encuesta_2026', ['emprendedores_idemprendedores','emprendedor_id']);
     if ($colEnc) {
         $stmt = $pdo->prepare("SELECT * FROM encuesta_2026 WHERE `$colEnc` = ? ORDER BY fecha_respuesta DESC");
     } else {
@@ -94,7 +94,7 @@ if ($eid) {
 // ── DOCUMENTOS (tabla: documentos, FK: emprendedores_idemprendedores) ─
 $documentos = [];
 if ($eid) {
-    $colDoc = firstExistingColumn($pdo, 'documentos', ['emprendedores_idemprendedores','emprendedores_idemprendedores']);
+    $colDoc = firstExistingColumn($pdo, 'documentos', ['emprendedores_idemprendedores','usuario_id']);
     if ($colDoc) {
         $stmt = $pdo->prepare("SELECT * FROM documentos WHERE `$colDoc` = ? ORDER BY fecha_subida DESC");
     } else {

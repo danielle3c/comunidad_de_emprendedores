@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Imprimir TODO - Tarjetas de Presentación';
 $pdo = getConnection();
 
-$stmt = $pdo->query("SELECT idtarjeta, nombre, cantidad, valor, created_at FROM tarjetas_presentacion ORDER BY idtarjeta DESC");
+$stmt = $pdo->query("SELECT idtarjeta, nombre, cantidad, valor_monetario, created_at FROM tarjetas_presentacion ORDER BY idtarjeta DESC");
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ob_start();
@@ -24,10 +24,10 @@ ob_start();
   <div class="card">
     <div class="table-responsive">
       <table class="table table-striped table-hover mb-0">
-        <thead><tr><th>ID</th><th>Nombre</th><th>Cantidad</th><th>Valor</th><th>Creado</th></tr></thead>
+        <thead><tr><th>ID</th><th>Nombre</th><th>Cantidad</th><th>Valor Monetario</th><th>Creado</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>
-          <tr><td><?= htmlspecialchars((string)($r['idtarjeta'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['nombre'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['cantidad'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['valor'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['created_at'] ?? '')) ?></td></tr>
+          <tr><td><?= htmlspecialchars((string)($r['idtarjeta'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['nombre'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['cantidad'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['valor_monetario'] ?? '')) ?></td><td><?= htmlspecialchars((string)($r['created_at'] ?? '')) ?></td></tr>
         <?php endforeach; ?>
         
         </tbody>

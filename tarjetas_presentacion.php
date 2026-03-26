@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/includes/auth_guard.php';
 require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Tarjetas de Presentación';
 

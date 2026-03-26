@@ -30,7 +30,7 @@ if (!defined('FROM_LAYOUT')):
 $_searchApiUrl = rtrim(
     str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])),
     '/'
-) . '/includes/search_global_api.php';
+) . '/personas_search_api.php';
 ?>
     <!-- TOPBAR -->
     <div class="topbar">

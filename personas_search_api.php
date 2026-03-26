@@ -108,12 +108,7 @@ try {
 } catch (PDOException $e) {
     error_log('[SmartSearch] ' . $e->getMessage());
     http_response_code(500);
-    // Devolver el error COMPLETO para poder diagnosticar
     echo json_encode([
-        'error'   => 'db_error',
-        'detalle' => $e->getMessage(),
-        'codigo'  => $e->getCode(),
-        'linea'   => $e->getLine(),
-        'archivo' => basename($e->getFile()),
+        'error' => 'db_error',
     ]);
 }

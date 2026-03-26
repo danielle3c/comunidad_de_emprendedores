@@ -64,7 +64,7 @@ try {
 
   // TARJETAS
   $stmt = $pdo->prepare("
-    SELECT idtarjeta AS id, nombre, cantidad, valor
+    SELECT idtarjeta AS id, nombre, cantidad, valor_monetario
     FROM tarjetas_presentacion
     WHERE nombre LIKE ?
     ORDER BY idtarjeta DESC
@@ -75,7 +75,7 @@ try {
     $out[] = [
       'tipo'   => 'tarjeta',
       'titulo' => ($t['nombre'] ?? '(Sin nombre)'),
-      'sub'    => 'Cant: ' . ($t['cantidad'] ?? '-') . ' | Valor: ' . ($t['valor'] ?? '-'),
+      'sub'    => 'Cant: ' . ($t['cantidad'] ?? '-') . ' | Valor: ' . ($t['valor_monetario'] ?? '-'),
       'url'    => 'tarjetas_presentacion.php?action=edit&id=' . (int)$t['id'],
     ];
   }
