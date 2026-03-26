@@ -947,3 +947,180 @@ hr {
 .hide-local-search .local-search-block {
   display: none !important;
 }
+/* =========================
+   🎨 ESTILO MODERNO PRO
+   ========================= */
+
+/* tarjetas */
+.card {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  transition: all .25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+/* buscador */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: all .2s ease;
+}
+
+.search-input:focus {
+  border-color: var(--brand-pick);
+  box-shadow: 0 0 0 2px var(--brand-dim);
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.6;
+}
+
+/* botones */
+.btn {
+  border-radius: 10px;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  transition: all .2s ease;
+}
+
+.btn-primary {
+  background: var(--brand-pick);
+  border: none;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.btn-outline:hover {
+  border-color: var(--brand-pick);
+  color: var(--brand-pick);
+}
+
+/* tabla moderna */
+.table-modern {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-modern thead {
+  background: var(--surface2);
+}
+
+.table-modern th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+
+.table-modern td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.table-modern tr:hover {
+  background: var(--table-row-hover);
+  transition: background .2s ease;
+}
+
+/* info persona */
+.persona-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--brand-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-pick);
+  font-size: 0.9rem;
+}
+
+/* nombre */
+.nombre {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* botón acción */
+.btn-action {
+  border: 1px solid var(--brand-pick);
+  color: var(--brand-pick);
+  background: transparent;
+}
+
+.btn-action:hover {
+  background: var(--brand-pick);
+  color: #fff;
+}
+
+/* historial */
+.historial-row {
+  display: none;
+}
+
+.historial-box {
+  background: var(--surface2);
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 3px solid var(--brand-pick);
+  animation: fadeIn .2s ease;
+}
+
+/* animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* scrollbar moderna */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-dim);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-pick);
+}
