@@ -1,189 +1,99 @@
-<?php
-require_once 'includes/auth_guard.php';
-require_once 'includes/helpers.php';
-$pageTitle = 'Talleres';
-$pdo = getConnection();
-
-$action = $_GET['action'] ?? 'list';
-$id     = (int)($_GET['id'] ?? 0);
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $cupoMax = (int)$_POST['cupo_maximo'];
-    $data = [
-        'nombre_taller'   => sanitize($_POST['nombre_taller']),
-        'descripcion'     => sanitize($_POST['descripcion'] ?? ''),
-        'fecha_taller'    => $_POST['fecha_taller'],
-        'hora_inicio'     => $_POST['hora_inicio'] ?: null,
-        'hora_fin'        => $_POST['hora_fin'] ?: null,
-        'lugar'           => sanitize($_POST['lugar'] ?? ''),
-        'cupo_maximo'     => $cupoMax,
-        'cupo_disponible' => (int)$_POST['cupo_disponible'] ?: $cupoMax,
-        'instructor'      => sanitize($_POST['instructor'] ?? ''),
-        'categoria'       => sanitize($_POST['categoria'] ?? ''),
-        'estado'          => $_POST['estado'] ?? 'Programado',
-    ];
-    try {
-        if ($_POST['id']) {
-            $sql = "UPDATE talleres SET nombre_taller=:nombre_taller,descripcion=:descripcion,fecha_taller=:fecha_taller,
-                    hora_inicio=:hora_inicio,hora_fin=:hora_fin,lugar=:lugar,cupo_maximo=:cupo_maximo,
-                    cupo_disponible=:cupo_disponible,instructor=:instructor,categoria=:categoria,estado=:estado WHERE idtalleres=:id";
-            $pdo->prepare($sql)->execute(array_merge($data,[':id'=>(int)$_POST['id']]));
-            setFlash('success','Taller actualizado.');
-        } else {
-            $sql = "INSERT INTO talleres (nombre_taller,descripcion,fecha_taller,hora_inicio,hora_fin,lugar,cupo_maximo,cupo_disponible,instructor,categoria,estado)
-                    VALUES (:nombre_taller,:descripcion,:fecha_taller,:hora_inicio,:hora_fin,:lugar,:cupo_maximo,:cupo_disponible,:instructor,:categoria,:estado)";
-            $pdo->prepare($sql)->execute($data);
-            setFlash('success','Taller creado.');
-        }
-    } catch (PDOException $e) { setFlash('error','Error: '.$e->getMessage()); }
-    redirect('talleres.php');
-}
-
-if ($action === 'delete' && $id) {
-    try { $pdo->prepare("DELETE FROM talleres WHERE idtalleres=?")->execute([$id]); setFlash('success','Taller eliminado.'); }
-    catch (PDOException $e) { setFlash('error','No se puede eliminar: '.$e->getMessage()); }
-    redirect('talleres.php');
-}
-
-$edit = null;
-if ($action === 'edit' && $id) {
-    $s = $pdo->prepare("SELECT * FROM talleres WHERE idtalleres=?"); $s->execute([$id]); $edit = $s->fetch();
-}
-
-$search = sanitize($_GET['search'] ?? '');
-$filtroEstado = sanitize($_GET['estado'] ?? '');
-$page = max(1,(int)($_GET['page'] ?? 1)); $perPage = 15;
-$conditions = []; $params = [];
-if ($search) { $conditions[] = "(nombre_taller LIKE :s OR instructor LIKE :s OR lugar LIKE :s OR categoria LIKE :s)"; $params[':s'] = "%$search%"; }
-if ($filtroEstado) { $conditions[] = "estado=:estado"; $params[':estado'] = $filtroEstado; }
-$where = $conditions ? "WHERE ".implode(' AND ',$conditions) : '';
-$tc = $pdo->prepare("SELECT COUNT(*) FROM talleres $where"); $tc->execute($params); $total = (int)$tc->fetchColumn();
-$pag = getPaginationData($total,$page,$perPage);
-$stmt = $pdo->prepare("SELECT * FROM talleres $where ORDER BY fecha_taller DESC LIMIT :limit OFFSET :offset");
-foreach ($params as $k=>$v) $stmt->bindValue($k,$v);
-$stmt->bindValue(':limit',$pag['perPage'],PDO::PARAM_INT);
-$stmt->bindValue(':offset',$pag['offset'],PDO::PARAM_INT);
-$stmt->execute(); $rows = $stmt->fetchAll();
-
-include 'includes/header.php';
+<?php 
+include 'config.php'; 
+$res_conf = mysqli_query($conexion, "SELECT * FROM configuraciones WHERE id = 1");
+$cfg = mysqli_fetch_assoc($res_conf);
 ?>
-
-<?php if ($action === 'edit' || $action === 'create'): ?>
-<div class="card mb-4">
-    <div class="card-header bg-white border-0 fw-semibold"><?= $edit ? 'Editar Taller' : 'Nuevo Taller' ?></div>
-    <div class="card-body">
-    <form method="POST">
-        <input type="hidden" name="id" value="<?= $edit['idtalleres'] ?? '' ?>">
-        <div class="row g-3">
-            <div class="col-md-5">
-                <label class="form-label">Nombre del Taller *</label>
-                <input type="text" name="nombre_taller" class="form-control form-control-sm" value="<?= $edit['nombre_taller'] ?? '' ?>" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Instructor</label>
-                <input type="text" name="instructor" class="form-control form-control-sm" value="<?= $edit['instructor'] ?? '' ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Categoría</label>
-                <input type="text" name="categoria" class="form-control form-control-sm" value="<?= $edit['categoria'] ?? '' ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Estado</label>
-                <select name="estado" class="form-select form-select-sm">
-                    <?php foreach (['Programado','En Curso','Finalizado','Cancelado'] as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($edit['estado'] ?? 'Programado') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Fecha *</label>
-                <input type="date" name="fecha_taller" class="form-control form-control-sm" value="<?= $edit['fecha_taller'] ?? '' ?>" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Hora Inicio</label>
-                <input type="time" name="hora_inicio" class="form-control form-control-sm" value="<?= $edit['hora_inicio'] ?? '' ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Hora Fin</label>
-                <input type="time" name="hora_fin" class="form-control form-control-sm" value="<?= $edit['hora_fin'] ?? '' ?>">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Lugar</label>
-                <input type="text" name="lugar" class="form-control form-control-sm" value="<?= $edit['lugar'] ?? '' ?>">
-            </div>
-            <div class="col-md-1">
-                <label class="form-label">Cupo Máx.</label>
-                <input type="number" name="cupo_maximo" class="form-control form-control-sm" value="<?= $edit['cupo_maximo'] ?? '0' ?>">
-            </div>
-            <div class="col-md-1">
-                <label class="form-label">Disponible</label>
-                <input type="number" name="cupo_disponible" class="form-control form-control-sm" value="<?= $edit['cupo_disponible'] ?? '0' ?>">
-            </div>
-            <div class="col-12">
-                <label class="form-label">Descripción</label>
-                <textarea name="descripcion" class="form-control form-control-sm" rows="2"><?= $edit['descripcion'] ?? '' ?></textarea>
-            </div>
-        </div>
-        <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
-            <a href="talleres.php" class="btn btn-secondary btn-sm">Cancelar</a>
-        </div>
-    </form>
-    </div>
-</div>
-<?php endif; ?>
-
-<div class="card">
-    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-        <span class="fw-semibold">Talleres <span class="badge bg-secondary"><?= $total ?></span></span>
-        <div class="d-flex gap-2 flex-wrap">
-            <div class="local-search-block">
-<form class="d-flex gap-2" method="GET">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
-                <select name="estado" class="form-select form-select-sm" style="width:130px">
-                    <option value="">Todos</option>
-                    <?php foreach (['Programado','En Curso','Finalizado','Cancelado'] as $opt): ?>
-                    <option value="<?= $opt ?>" <?= $filtroEstado===$opt?'selected':'' ?>><?= $opt ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
-            </form>
-</div>
-            <a href="talleres.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
-        </div>
-    
-    <?php include __DIR__ . '/includes/print_button.php'; ?>
-</div>
-    <div class="card-body p-0">
-    <div class="table-responsive">
-    <table class="table table-hover mb-0 dt-export" data-title="Listado de Talleres">
-        <thead><tr><th>ID</th><th>Nombre</th><th>Instructor</th><th>Categoría</th><th>Fecha</th><th>Horario</th><th>Lugar</th><th>Cupo</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody>
-        <?php foreach ($rows as $r): ?>
-        <tr>
-            <td><?= $r['idtalleres'] ?></td>
-            <td><?= sanitize($r['nombre_taller']) ?></td>
-            <td><?= sanitize($r['instructor']) ?: '-' ?></td>
-            <td><?= sanitize($r['categoria']) ?: '-' ?></td>
-            <td><?= formatDate($r['fecha_taller']) ?></td>
-            <td><?= $r['hora_inicio'] ? substr($r['hora_inicio'],0,5).' - '.substr($r['hora_fin'],0,5) : '-' ?></td>
-            <td><?= sanitize($r['lugar']) ?: '-' ?></td>
-            <td><?= $r['cupo_disponible'] ?>/<?= $r['cupo_maximo'] ?></td>
-            <td><?= badgeEstado($r['estado']) ?></td>
-            <td>
-                <a href="inscripciones_talleres.php?taller_id=<?= $r['idtalleres'] ?>" class="btn btn-sm btn-outline-success btn-action" title="Inscripciones"><i class="bi bi-person-plus"></i></a>
-                <a href="talleres.php?action=edit&id=<?= $r['idtalleres'] ?>" class="btn btn-sm btn-outline-primary btn-action"><i class="bi bi-pencil"></i></a>
-                <a href="talleres.php?action=delete&id=<?= $r['idtalleres'] ?>" class="btn btn-sm btn-outline-danger btn-action btn-delete"><i class="bi bi-trash"></i></a>
-            </td>
-        </tr>
-        <?php endforeach; ?>
+<!DOCTYPE html>
+<html lang="es" data-theme="<?php echo $cfg['tema_color']; ?>">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Talleres | <?php echo $cfg['nombre_sistema']; ?></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos base del sistema */
+        :root { --bg: #f4f7fe; --card: #ffffff; --text: #2b3674; --primary: #55b83e; --border: #e0e5f2; --secondary-text: #a3aed0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        </tbody>
-    </table>
+        .header-historial { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-inicio { background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 12px; text-decoration: none; color: var(--text); font-weight: 700; }
+        .btn-nuevo { background: #4361ee; color: white; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; }
+
+        .search-bar { background: white; border-radius: 15px; padding: 10px; display: flex; gap: 10px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .search-bar input { flex: 1; border: none; outline: none; padding-left: 10px; }
+        .btn-search { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; }
+
+        .table-container { background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fc; padding: 15px; text-align: left; color: var(--secondary-text); font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 15px; border-top: 1px solid var(--border); font-size: 0.9rem; }
+
+        .date-box { font-weight: 800; }
+        .time-tag { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; margin-top: 5px; }
+        .tag-green { background: #e6fffa; color: #047857; }
+        
+        .status-badge { background: #dcfce7; color: #55b83e; padding: 5px 15px; border-radius: 10px; font-weight: 800; font-size: 0.75rem; }
+        .actions i { margin: 0 5px; cursor: pointer; }
+        .fa-edit { color: #4361ee; }
+        .fa-trash { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div class="header-historial">
+        <a href="index.php" class="btn-inicio"><i class="fas fa-home"></i> Inicio</a>
+        <h2 style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-chalkboard-user"></i> Historial de Talleres</h2>
+        <a href="nuevo_taller.php" class="btn-nuevo"><i class="fas fa-plus"></i> Nuevo</a>
     </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="Buscar taller o emprendedor...">
+        <button class="btn-search"><i class="fas fa-search"></i></button>
     </div>
-    <?php if ($pag['totalPages'] > 1): ?>
-    <div class="card-footer bg-white border-0"><?= renderPagination($pag,'talleres.php?search='.urlencode($search).'&estado='.urlencode($filtroEstado)) ?></div>
-    <?php endif; ?>
-</div>
-<?php include 'includes/footer.php'; ?>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha y Horario</th>
+                    <th>Emprendedor</th>
+                    <th>Nombre del Taller</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Esta consulta une la asistencia con los datos del taller y la persona
+                $sql = "SELECT t.nombre as taller, t.fecha, p.nombres, p.apellidos, p.rut 
+                        FROM asistencia_talleres at
+                        JOIN talleres t ON at.talleres_id = t.idtalleres
+                        JOIN emprendedores e ON at.emprendedores_id = e.idemprendedores
+                        JOIN personas p ON e.personas_idpersonas = p.idpersonas
+                        ORDER BY t.fecha DESC";
+                $res = mysqli_query($conexion, $sql);
+                while($row = mysqli_fetch_assoc($res)):
+                ?>
+                <tr>
+                    <td>
+                        <div class="date-box"><?php echo date("d/m/Y", strtotime($row['fecha'])); ?></div>
+                        <div class="time-tag tag-green"><i class="far fa-clock"></i> Realizado</div>
+                    </td>
+                    <td>
+                        <strong><?php echo $row['nombres']." ".$row['apellidos']; ?></strong><br>
+                        <small style="color: var(--secondary-text);"><?php echo $row['rut']; ?></small>
+                    </td>
+                    <td><?php echo $row['taller']; ?></td>
+                    <td><span class="status-badge">ASISTIÓ</span></td>
+                    <td class="actions">
+                        <i class="fas fa-edit"></i>
+                        <i class="fas fa-trash"></i>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

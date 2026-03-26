@@ -1,176 +1,142 @@
-<?php
-require_once 'includes/auth_guard.php';
-require_once 'includes/helpers.php';
-$pageTitle = 'Contratos';
-$pdo = getConnection();
+<?php 
+include 'config.php'; 
 
-$action = $_GET['action'] ?? 'list';
-$id     = (int)($_GET['id'] ?? 0);
+// Obtener configuración para el tema visual
+$res_conf = mysqli_query($conexion, "SELECT * FROM configuraciones WHERE id = 1");
+$cfg = mysqli_fetch_assoc($res_conf);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = [
-        'emprendedores_idemprendedores' => (int)$_POST['emprendedores_idemprendedores'],
-        'fecha_inicio'   => $_POST['fecha_inicio'],
-        'fecha_termino'  => $_POST['fecha_termino'] ?: null,
-        'monto_total'    => (float)str_replace(',','.',$_POST['monto_total'] ?? 0),
-        'descripcion'    => sanitize($_POST['descripcion'] ?? ''),
-        'tipo_contrato'  => sanitize($_POST['tipo_contrato'] ?? ''),
-        'estado'         => $_POST['estado'] ?? 'Activo',
-    ];
-    try {
-        if ($_POST['id']) {
-            $sql = "UPDATE Contratos SET emprendedores_idemprendedores=:emprendedores_idemprendedores,
-                    fecha_inicio=:fecha_inicio,fecha_termino=:fecha_termino,monto_total=:monto_total,
-                    descripcion=:descripcion,tipo_contrato=:tipo_contrato,estado=:estado WHERE idContratos=:id";
-            $pdo->prepare($sql)->execute(array_merge($data, [':id' => (int)$_POST['id']]));
-            setFlash('success', 'Contrato actualizado.');
-        } else {
-            $sql = "INSERT INTO Contratos (emprendedores_idemprendedores,fecha_inicio,fecha_termino,monto_total,descripcion,tipo_contrato,estado)
-                    VALUES (:emprendedores_idemprendedores,:fecha_inicio,:fecha_termino,:monto_total,:descripcion,:tipo_contrato,:estado)";
-            $pdo->prepare($sql)->execute($data);
-            setFlash('success', 'Contrato creado.');
-        }
-    } catch (PDOException $e) { setFlash('error', 'Error: ' . $e->getMessage()); }
-    redirect('contratos.php');
+$mensaje = "";
+
+if(isset($_POST['save_con'])){
+    $ide = mysqli_real_escape_string($conexion, $_POST['id_emprendedor']);
+    $monto = mysqli_real_escape_string($conexion, $_POST['monto_total']);
+    $plazo = mysqli_real_escape_string($conexion, $_POST['plazo']);
+    
+    // Insertamos con estado 1 (Activo)
+    $sql = "INSERT INTO Contratos (fecha_firma, monto_total, plazo_meses, total_pagado, emprendedores_idemprendedores, created_at, estado) 
+            VALUES (CURDATE(), '$monto', '$plazo', 0, '$ide', NOW(), 1)";
+    
+    if(mysqli_query($conexion, $sql)){
+        $mensaje = "<div class='alert success'>Contrato N° ".mysqli_insert_id($conexion)." generado y firmado con éxito.</div>";
+    } else {
+        $mensaje = "<div class='alert error'>Error al registrar: " . mysqli_error($conexion) . "</div>";
+    }
 }
-
-if ($action === 'delete' && $id) {
-    try { $pdo->prepare("DELETE FROM Contratos WHERE idContratos=?")->execute([$id]); setFlash('success', 'Contrato eliminado.'); }
-    catch (PDOException $e) { setFlash('error', 'No se puede eliminar: ' . $e->getMessage()); }
-    redirect('contratos.php');
-}
-
-$edit = null;
-if ($action === 'edit' && $id) {
-    $s = $pdo->prepare("SELECT * FROM Contratos WHERE idContratos=?"); $s->execute([$id]); $edit = $s->fetch();
-}
-
-$emprendedores = $pdo->query("SELECT e.idemprendedores, CONCAT(p.nombres,' ',p.apellidos,' - ',p.rut) AS label
-    FROM emprendedores e JOIN personas p ON e.personas_idpersonas=p.idpersonas WHERE e.estado=1 ORDER BY p.nombres")->fetchAll();
-
-$search  = sanitize($_GET['search'] ?? '');
-$filtroEstado = sanitize($_GET['estado'] ?? '');
-$page    = max(1,(int)($_GET['page'] ?? 1));
-$perPage = 15;
-$conditions = [];
-$params = [];
-if ($search) { $conditions[] = "(p.nombres LIKE :s OR p.apellidos LIKE :s OR c.tipo_contrato LIKE :s)"; $params[':s'] = "%$search%"; }
-if ($filtroEstado) { $conditions[] = "c.estado=:estado"; $params[':estado'] = $filtroEstado; }
-$where = $conditions ? "WHERE " . implode(' AND ', $conditions) : '';
-$base = "FROM Contratos c JOIN emprendedores e ON c.emprendedores_idemprendedores=e.idemprendedores JOIN personas p ON e.personas_idpersonas=p.idpersonas $where";
-$tc = $pdo->prepare("SELECT COUNT(*) $base"); $tc->execute($params); $total = (int)$tc->fetchColumn();
-$pag = getPaginationData($total, $page, $perPage);
-$stmt = $pdo->prepare("SELECT c.*, CONCAT(p.nombres,' ',p.apellidos) AS nombre_persona $base ORDER BY c.fecha_inicio DESC LIMIT :limit OFFSET :offset");
-foreach ($params as $k => $v) $stmt->bindValue($k, $v);
-$stmt->bindValue(':limit', $pag['perPage'], PDO::PARAM_INT);
-$stmt->bindValue(':offset', $pag['offset'], PDO::PARAM_INT);
-$stmt->execute(); $rows = $stmt->fetchAll();
-
-include 'includes/header.php';
 ?>
 
-<?php if ($action === 'edit' || $action === 'create'): ?>
-<div class="card mb-4">
-    <div class="card-header bg-white border-0 fw-semibold"><?= $edit ? 'Editar Contrato' : 'Nuevo Contrato' ?></div>
-    <div class="card-body">
-    <form method="POST">
-        <input type="hidden" name="id" value="<?= $edit['idContratos'] ?? '' ?>">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Emprendedor *</label>
-                <select name="emprendedores_idemprendedores" class="form-select form-select-sm" required>
-                    <option value="">-- Seleccione --</option>
-                    <?php foreach ($emprendedores as $e): ?>
-                    <option value="<?= $e['idemprendedores'] ?>" <?= ($edit['emprendedores_idemprendedores'] ?? '') == $e['idemprendedores'] ? 'selected' : '' ?>><?= sanitize($e['label']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Fecha Inicio *</label>
-                <input type="date" name="fecha_inicio" class="form-control form-control-sm" value="<?= $edit['fecha_inicio'] ?? date('Y-m-d') ?>" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Fecha Término</label>
-                <input type="date" name="fecha_termino" class="form-control form-control-sm" value="<?= $edit['fecha_termino'] ?? '' ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Monto Total *</label>
-                <input type="number" step="0.01" name="monto_total" class="form-control form-control-sm" value="<?= $edit['monto_total'] ?? '' ?>" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Estado</label>
-                <select name="estado" class="form-select form-select-sm">
-                    <?php foreach (['Activo','Finalizado','Cancelado'] as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($edit['estado'] ?? 'Activo') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Tipo de Contrato</label>
-                <input type="text" name="tipo_contrato" class="form-control form-control-sm" value="<?= $edit['tipo_contrato'] ?? '' ?>">
-            </div>
-            <div class="col-md-9">
-                <label class="form-label">Descripción</label>
-                <textarea name="descripcion" class="form-control form-control-sm" rows="2"><?= $edit['descripcion'] ?? '' ?></textarea>
-            </div>
-        </div>
-        <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
-            <a href="contratos.php" class="btn btn-secondary btn-sm">Cancelar</a>
-        </div>
-    </form>
-    </div>
-</div>
-<?php endif; ?>
-
-<div class="card">
-    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-        <span class="fw-semibold">Contratos <span class="badge bg-secondary"><?= $total ?></span></span>
-        <div class="d-flex gap-2 flex-wrap">
-            <div class="local-search-block">
-<form class="d-flex gap-2" method="GET">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
-                <select name="estado" class="form-select form-select-sm" style="width:130px">
-                    <option value="">Todos</option>
-                    <?php foreach (['Activo','Finalizado','Cancelado'] as $opt): ?>
-                    <option value="<?= $opt ?>" <?= $filtroEstado === $opt ? 'selected' : '' ?>><?= $opt ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
-            </form>
-</div>
-            <a href="contratos.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
-        </div>
-    
-    <?php include __DIR__ . '/includes/print_button.php'; ?>
-</div>
-    <div class="card-body p-0">
-    <div class="table-responsive">
-    <table class="table table-hover mb-0 dt-export" data-title="Listado de Contratos">
-        <thead><tr><th>ID</th><th>Emprendedor</th><th>Tipo</th><th>Inicio</th><th>Término</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody>
-        <?php foreach ($rows as $r): ?>
-        <tr>
-            <td><?= $r['idContratos'] ?></td>
-            <td><?= sanitize($r['nombre_persona']) ?></td>
-            <td><?= sanitize($r['tipo_contrato']) ?: '-' ?></td>
-            <td><?= formatDate($r['fecha_inicio']) ?></td>
-            <td><?= formatDate($r['fecha_termino']) ?></td>
-            <td><?= formatMoney($r['monto_total']) ?></td>
-            <td><?= badgeEstado($r['estado']) ?></td>
-            <td>
-                <a href="contratos.php?action=edit&id=<?= $r['idContratos'] ?>" class="btn btn-sm btn-outline-primary btn-action"><i class="bi bi-pencil"></i></a>
-                <a href="contratos.php?action=delete&id=<?= $r['idContratos'] ?>" class="btn btn-sm btn-outline-danger btn-action btn-delete"><i class="bi bi-trash"></i></a>
-            </td>
-        </tr>
-        <?php endforeach; ?>
+<!DOCTYPE html>
+<html lang="es" data-theme="<?php echo $cfg['tema_color']; ?>">
+<head>
+    <meta charset="UTF-8">
+    <title>Generar Contrato - <?php echo $cfg['nombre_sistema']; ?></title>
+    <style>
+        :root { --bg: #f4f7f6; --text: #333; --card: #fff; --primary: #55b83e; --accent: #2c3e50; }
+        [data-theme="dark"] { --bg: #1a1a1a; --text: #f0f0f0; --card: #2d2d2d; --primary: #2ecc71; --accent: #ecf0f1; }
         
-        </tbody>
-    </table>
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 550px; margin: auto; background: var(--card); padding: 35px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        h2 { text-align: center; color: var(--accent); margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: var(--primary); font-weight: bold; margin-bottom: 25px; font-size: 0.9em; }
+        
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 7px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input, select { 
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; 
+            box-sizing: border-box; background: var(--card); color: var(--text); font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .calc-info { 
+            background: rgba(67, 176, 42, 0.1); padding: 15px; border-radius: 10px; 
+            margin: 20px 0; font-size: 0.9em; border: 1px dashed var(--primary);
+        }
+
+        .btn-save { 
+            background: var(--primary); color: white; border: none; padding: 16px; 
+            width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; 
+            font-size: 1.1em; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-save:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        .alert { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        .success { background: #dcfce7; color: #55b83e; border: 1px solid #86efac; }
+        .error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        
+        .footer { margin-top: 25px; text-align: center; display: flex; justify-content: center; gap: 20px; }
+        .footer a { color: var(--primary); text-decoration: none; font-size: 0.9em; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Contrato de Financiamiento</h2>
+    <p class="subtitle">SISTEMA DE GESTIÓN DE CRÉDITOS</p>
+    
+    <?php echo $mensaje; ?>
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Socio / Emprendedor:</label>
+            <select name="id_emprendedor" required>
+                <option value="">Seleccione al titular...</option>
+                <?php
+                $res = mysqli_query($conexion, "SELECT e.idemprendedores, p.nombres, p.apellidos, e.limite_credito 
+                                            FROM emprendedores e 
+                                            JOIN personas p ON e.personas_idpersonas = p.idpersonas 
+                                            WHERE p.deleted_at IS NULL");
+                while($e = mysqli_fetch_assoc($res)){
+                    echo "<option value='{$e['idemprendedores']}'>{$e['nombres']} {$e['apellidos']} (Máx: \${$e['limite_credito']})</option>";
+                }
+                ?>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Monto a Financiar ($):</label>
+            <input type="number" step="0.01" name="monto_total" id="monto" placeholder="0.00" required>
+        </div>
+
+        <div class="form-group">
+            <label>Plazo de Devolución (Meses):</label>
+            <input type="number" name="plazo" id="plazo" placeholder="Ej: 12" required>
+        </div>
+
+        <div class="calc-info" id="simulador">
+            Cuota estimada: <b>$0.00</b> al mes.
+        </div>
+
+        <button type="submit" name="save_con" class="btn-save">
+            Firmar y Registrar Contrato
+        </button>
+    </form>
+
+    <div class="footer">
+        <a href="index.php">Inicio</a>
+        <a href="contratos_lista.php">Ver todos</a>
     </div>
-    </div>
-    <?php if ($pag['totalPages'] > 1): ?>
-    <div class="card-footer bg-white border-0"><?= renderPagination($pag, 'contratos.php?search='.urlencode($search).'&estado='.urlencode($filtroEstado)) ?></div>
-    <?php endif; ?>
 </div>
-<?php include 'includes/footer.php'; ?>
+
+<script>
+    // Pequeño script para calcular cuota en tiempo real
+    const montoInput = document.getElementById('monto');
+    const plazoInput = document.getElementById('plazo');
+    const simulador = document.getElementById('simulador');
+
+    function actualizarCuota() {
+        const monto = parseFloat(montoInput.value) || 0;
+        const plazo = parseInt(plazoInput.value) || 0;
+        if(monto > 0 && plazo > 0) {
+            const cuota = (monto / plazo).toFixed(2);
+            simulador.innerHTML = `Cuota estimada: <b>$${cuota}</b> al mes por ${plazo} meses.`;
+        }
+    }
+
+    montoInput.addEventListener('input', actualizarCuota);
+    plazoInput.addEventListener('input', actualizarCuota);
+</script>
+
+</body>
+</html>

@@ -1,142 +1,152 @@
-<?php
-require_once 'includes/auth_guard.php';
-require_once 'includes/helpers.php';
-$pageTitle = 'Configuración del Sistema';
-$pdo = getConnection();
+<?php 
+include 'config.php'; 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = [
-        'nombre_sistema'    => sanitize($_POST['nombre_sistema']),
-        'tema_color'        => sanitize($_POST['tema_color'] ?? 'light'),
-        'email_sistema'     => sanitize($_POST['email_sistema'] ?? ''),
-        'telefono_sistema'  => sanitize($_POST['telefono_sistema'] ?? ''),
-        'direccion_sistema' => sanitize($_POST['direccion_sistema'] ?? ''),
-    ];
+$mensaje = "";
 
-    // Logo upload
-    if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
-        $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
-        $allowedMimes = ['image/jpeg','image/png','image/svg+xml','image/gif'];
-        $fileMime = mime_content_type($_FILES['logo']['tmp_name']);
-        if (in_array($ext, ['jpg','jpeg','png','svg','gif']) && in_array($fileMime, $allowedMimes)) {
-            $dir = __DIR__ . '/uploads/';
-            if (!is_dir($dir)) @mkdir($dir, 0755, true);
-            $nombre = 'logo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-            if (move_uploaded_file($_FILES['logo']['tmp_name'], $dir . $nombre)) {
-                $data['logo'] = 'uploads/' . $nombre;
-            }
-        } else {
-            setFlash('error', 'Tipo de archivo no permitido para el logo.');
-        }
+// 1. OBTENER LA CONFIGURACIÓN ACTUAL
+$consulta = mysqli_query($conexion, "SELECT * FROM configuraciones WHERE id = 1");
+$cfg = mysqli_fetch_assoc($consulta);
+
+// 2. SISTEMA DE TRADUCCIÓN SIMPLE
+$lang = $cfg['idioma'];
+$textos = [
+    'es' => [
+        'titulo' => 'Configuración del Sistema',
+        'nombre' => 'Corporación de Fomento La Granja',
+        'tema'   => 'Tema Visual',
+        'idioma' => 'Idioma',
+        'guardar'=> 'Guardar Cambios',
+        'moneda' => 'Símbolo de Moneda',
+        'paginas'=> 'Registros por página',
+        'salir'  => 'Cerrar Sesión Segura'
+    ],
+    'en' => [
+        'titulo' => 'System Settings',
+        'nombre' => 'Application Name',
+        'tema'   => 'Visual Theme',
+        'idioma' => 'Language',
+        'guardar'=> 'Save Changes',
+        'moneda' => 'Currency Symbol',
+        'paginas'=> 'Records per page',
+        'salir'  => 'Secure Logout'
+    ]
+];
+$t = $textos[$lang];
+
+// 3. PROCESAR LA ACTUALIZACIÓN
+if (isset($_POST['actualizar'])) {
+    $nombre = mysqli_real_escape_string($conexion, $_POST['nombre_sistema']);
+    $tema   = mysqli_real_escape_string($conexion, $_POST['tema_color']);
+    $idioma = mysqli_real_escape_string($conexion, $_POST['idioma']);
+    $moneda = mysqli_real_escape_string($conexion, $_POST['moneda']);
+    $paginas = (int)$_POST['registros_pagina'];
+
+    $sql = "UPDATE configuraciones SET 
+            nombre_sistema = '$nombre', 
+            tema_color = '$tema', 
+            idioma = '$idioma',
+            simbolo_moneda = '$moneda',
+            registros_pagina = '$paginas'
+            WHERE id = 1";
+
+    if (mysqli_query($conexion, $sql)) {
+        echo "<script>window.location.href='configuraciones.php';</script>"; 
     } else {
-        // Restringir para que solo acepte rutas que empiecen con uploads/
-        $logoActual = sanitize($_POST['logo_actual'] ?? '');
-        $data['logo'] = str_starts_with($logoActual, 'uploads/') ? $logoActual : '';
+        $mensaje = "<div class='alert error'>Error: " . mysqli_error($conexion) . "</div>";
     }
-
-    try {
-        $s = $pdo->query("SELECT id FROM configuraciones LIMIT 1");
-        $existing = $s->fetch();
-        if ($existing) {
-            $sets = implode(',', array_map(fn($k) => "$k=:$k", array_keys($data)));
-            $pdo->prepare("UPDATE configuraciones SET $sets WHERE id=1")->execute($data);
-        } else {
-            $cols = implode(',',array_keys($data));
-            $vals = ':'.implode(',:', array_keys($data));
-            $pdo->prepare("INSERT INTO configuraciones ($cols) VALUES ($vals)")->execute($data);
-        }
-        setFlash('success','Configuración guardada correctamente.');
-    } catch (PDOException $e) { setFlash('error','Error: '.$e->getMessage()); }
-    redirect('configuraciones.php');
 }
-
-$config = $pdo->query("SELECT * FROM configuraciones WHERE id=1")->fetch();
-
-include 'includes/header.php';
 ?>
 
-<div class="row justify-content-center">
-<div class="col-lg-8">
-<div class="card">
-    <div class="card-header bg-white border-0 fw-semibold">Configuración General del Sistema</div>
-    <div class="card-body">
-    <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="logo_actual" value="<?= htmlspecialchars($config['logo'] ?? '') ?>">
+<!DOCTYPE html>
+<html lang="<?php echo $cfg['idioma']; ?>" data-theme="<?php echo $cfg['tema_color']; ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $t['titulo']; ?> - <?php echo $cfg['nombre_sistema']; ?></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --bg: #f4f7f6; --text: #333; --card: #fff; --primary: #55b83e; --secondary: #6c757d; --border: #ddd; }
+        [data-theme="dark"] { --bg: #1a1a1a; --text: #f0f0f0; --card: #2d2d2d; --primary: #2ecc71; --secondary: #a0a0a0; --border: #444; }
+        [data-theme="blue"] { --bg: #e0e6ed; --text: #1a2a3a; --card: #fff; --primary: #0056b3; --secondary: #5a6268; --border: #cbd5e0; }
 
-        <div class="row g-3">
-            <div class="col-md-8">
-                <label class="form-label">Nombre del Sistema *</label>
-                <input type="text" name="nombre_sistema" class="form-control" value="<?= $config['nombre_sistema'] ?? 'Sistema de Emprendedores' ?>" required>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Tema de Color</label>
-                <select name="tema_color" class="form-select">
-                    <?php foreach (['light'=>'Claro','dark'=>'Oscuro','blue'=>'Azul','green'=>'Verde'] as $val=>$label): ?>
-                    <option value="<?= $val ?>" <?= ($config['tema_color'] ?? 'light') === $val ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; }
+        .container { max-width: 700px; margin: auto; background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 30px; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.85em; text-transform: uppercase; color: var(--secondary); }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: var(--card); color: var(--text); }
+        
+        .btn-save { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 30px; font-size: 1.1em; transition: 0.3s; }
+        .btn-save:hover { opacity: 0.9; transform: scale(1.01); }
+
+        /* Estilos Logout */
+        .logout-section { margin-top: 40px; text-align: center; border-top: 1px solid var(--border); padding-top: 20px; }
+        .btn-logout { 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            background: #e74c3c; color: white !important; text-decoration: none; 
+            padding: 12px; border-radius: 10px; font-weight: bold; transition: 0.3s; 
+        }
+        .btn-logout:hover { background: #c0392b; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
+
+        .nav-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-nav { flex: 1; text-align: center; padding: 12px; text-decoration: none; border-radius: 8px; font-size: 0.9em; font-weight: bold; color: white !important; background: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2><i class="fas fa-cogs"></i> <?php echo $t['titulo']; ?></h2>
+    
+    <?php echo $mensaje; ?>
+
+    <form method="POST">
+        <label><?php echo $t['nombre']; ?>:</label>
+        <input type="text" name="nombre_sistema" value="<?php echo $cfg['nombre_sistema']; ?>" required>
+
+        <div class="grid">
+            <div>
+                <label><?php echo $t['tema']; ?>:</label>
+                <select name="tema_color">
+                    <option value="light" <?php if($cfg['tema_color'] == 'light') echo 'selected'; ?>>Light / Claro</option>
+                    <option value="dark" <?php if($cfg['tema_color'] == 'dark') echo 'selected'; ?>>Dark / Oscuro</option>
+                    <option value="blue" <?php if($cfg['tema_color'] == 'blue') echo 'selected'; ?>>Blue / Azul</option>
                 </select>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Email del Sistema</label>
-                <input type="email" name="email_sistema" class="form-control" value="<?= $config['email_sistema'] ?? '' ?>">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Teléfono</label>
-                <input type="text" name="telefono_sistema" class="form-control" value="<?= $config['telefono_sistema'] ?? '' ?>">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Logo</label>
-                <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png,.svg,.gif">
-                <?php if ($config['logo'] ?? ''): ?>
-                <div class="mt-2"><img src="<?= htmlspecialchars($config['logo']) ?>" alt="Logo actual" style="max-height:60px; max-width:200px; object-fit:contain;"></div>
-                <?php endif; ?>
-            </div>
-            <div class="col-12">
-                <label class="form-label">Dirección</label>
-                <textarea name="direccion_sistema" class="form-control" rows="2"><?= $config['direccion_sistema'] ?? '' ?></textarea>
+            <div>
+                <label><?php echo $t['idioma']; ?>:</label>
+                <select name="idioma">
+                    <option value="es" <?php if($cfg['idioma'] == 'es') echo 'selected'; ?>>Español</option>
+                    <option value="en" <?php if($cfg['idioma'] == 'en') echo 'selected'; ?>>English</option>
+                </select>
             </div>
         </div>
 
-        <?php if ($config): ?>
-        <div class="mt-4 p-3 bg-light rounded">
-            <div class="row text-muted" style="font-size:.8rem">
-                <div class="col-md-4"><strong>Creado:</strong> <?= formatDateTime($config['created_at']) ?></div>
-                <div class="col-md-4"><strong>Actualizado:</strong> <?= formatDateTime($config['updated_at']) ?></div>
+        <div class="grid">
+            <div>
+                <label><?php echo $t['moneda']; ?>:</label>
+                <input type="text" name="moneda" value="<?php echo $cfg['simbolo_moneda']; ?>">
+            </div>
+            <div>
+                <label><?php echo $t['paginas']; ?>:</label>
+                <input type="number" name="registros_pagina" value="<?php echo $cfg['registros_pagina']; ?>">
             </div>
         </div>
-        <?php endif; ?>
 
-        <div class="mt-3">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Guardar Configuración</button>
-        </div>
+        <button type="submit" name="actualizar" class="btn-save">
+            <i class="fas fa-save"></i> <?php echo $t['guardar']; ?>
+        </button>
     </form>
-    </div>
-</div>
 
-<!-- Info del sistema -->
-<div class="card mt-3">
-    <div class="card-header bg-white border-0 fw-semibold">Información del Sistema</div>
-    <div class="card-body">
-        <div class="row g-3 text-sm">
-            <?php
-            $tablas = ['personas','emprendedores','Contratos','creditos','cobranzas','talleres','inscripciones_talleres','jornadas','carritos','encuesta_2026','documentos','Usuarios','auditoria'];
-            foreach ($tablas as $tbl):
-                try { $cnt = $pdo->query("SELECT COUNT(*) FROM `$tbl`")->fetchColumn(); } catch (Exception $e) { $cnt = 'Error'; }
-            ?>
-            <div class="col-md-4 col-6">
-                <div class="d-flex justify-content-between border-bottom py-1">
-                    <span class="text-muted" style="font-size:.82rem"><?= $tbl ?></span>
-                    <span class="badge bg-light text-dark"><?= $cnt ?></span>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        <div class="mt-3 text-muted" style="font-size:.8rem">
-            <strong>PHP:</strong> <?= PHP_VERSION ?> &nbsp; <strong>MySQL:</strong> <?= $pdo->query("SELECT VERSION()")->fetchColumn() ?>
+    <div class="logout-section">
+        <a href="logout.php" class="btn-logout">
+            <i class="fas fa-power-off"></i> <?php echo $t['salir']; ?>
+        </a>
+        <div class="nav-buttons">
+            <a href="index.php" class="btn-nav">Volver al Inicio</a>
         </div>
     </div>
 </div>
-</div>
-</div>
 
-<?php include 'includes/footer.php'; ?>
+</body>
+</html>

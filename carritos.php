@@ -1,178 +1,155 @@
-<?php
-require_once 'includes/auth_guard.php';
-require_once 'includes/helpers.php';
-$pageTitle = 'Carritos / Puestos';
-$pdo = getConnection();
+<?php 
+include 'config.php'; 
 
-$action = $_GET['action'] ?? 'list';
-$id     = (int)($_GET['id'] ?? 0);
+// 1. Cargar configuración del sistema
+$res_conf = mysqli_query($conexion, "SELECT * FROM configuraciones WHERE id = 1");
+$cfg = mysqli_fetch_assoc($res_conf);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = [
-        'nombre_responsable'   => sanitize($_POST['nombre_responsable']),
-        'telefono_responsable' => sanitize($_POST['telefono_responsable'] ?? ''),
-        'nombre_carrito'       => sanitize($_POST['nombre_carrito']),
-        'descripcion'          => sanitize($_POST['descripcion'] ?? ''),
-        'equipamiento'         => sanitize($_POST['equipamiento'] ?? ''),
-        'asistencia'           => $_POST['asistencia'] ?? 'Pendiente',
-        'hora_salida'          => $_POST['hora_salida'] ?: null,
-        'fecha_registro'       => $_POST['fecha_registro'] ?: null,
-        'estado'               => isset($_POST['estado']) ? 1 : 0,
-    ];
-    try {
-        if ($_POST['id']) {
-            $sql = "UPDATE carritos SET nombre_responsable=:nombre_responsable,
-                    telefono_responsable=:telefono_responsable,nombre_carrito=:nombre_carrito,descripcion=:descripcion,
-                    equipamiento=:equipamiento,asistencia=:asistencia,hora_salida=:hora_salida,fecha_registro=:fecha_registro,estado=:estado WHERE idcarritos=:id";
-            $pdo->prepare($sql)->execute(array_merge($data,[':id'=>(int)$_POST['id']]));
-            setFlash('success','Carrito actualizado.');
-        } else {
-            $sql = "INSERT INTO carritos (nombre_responsable,telefono_responsable,nombre_carrito,descripcion,equipamiento,asistencia,hora_salida,fecha_registro,estado)
-                    VALUES (:nombre_responsable,:telefono_responsable,:nombre_carrito,:descripcion,:equipamiento,:asistencia,:hora_salida,:fecha_registro,:estado)";
-            $pdo->prepare($sql)->execute($data);
-            setFlash('success','Carrito registrado.');
-        }
-    } catch (PDOException $e) { setFlash('error','Error: '.$e->getMessage()); }
-    redirect('carritos.php');
+$mensaje = "";
+
+// 2. Lógica para guardar el registro
+if(isset($_POST['save_car'])){
+    $nombre_persona = mysqli_real_escape_string($conexion, $_POST['nombre_persona']); 
+    $telefono       = mysqli_real_escape_string($conexion, $_POST['telefono']); 
+    $nom_carrito    = mysqli_real_escape_string($conexion, $_POST['nombre_c']); 
+    $des            = mysqli_real_escape_string($conexion, $_POST['desc']); 
+    $equ            = mysqli_real_escape_string($conexion, $_POST['equip']);
+    $ast            = mysqli_real_escape_string($conexion, $_POST['asistencia']); 
+    
+    $fecha_reg      = mysqli_real_escape_string($conexion, $_POST['fecha_reg']);
+    $hora_ingreso   = mysqli_real_escape_string($conexion, $_POST['hora_ingreso']);
+    $hora_salida    = mysqli_real_escape_string($conexion, $_POST['hora_salida']);
+    
+    $fecha_final    = $fecha_reg . " " . $hora_ingreso . ":00";
+
+    $sql = "INSERT INTO carritos (nombre_responsable, telefono_responsable, nombre_carrito, descripcion, equipamiento, asistencia, created_at, hora_salida) 
+            VALUES ('$nombre_persona', '$telefono', '$nom_carrito', '$des', '$equ', '$ast', '$fecha_final', '$hora_salida')";
+
+    if(mysqli_query($conexion, $sql)){
+        $mensaje = "<div class='alert success'><i class='fas fa-check-circle'></i> Registro guardado con éxito</div>";
+    } else {
+        $mensaje = "<div class='alert error'>Error: " . mysqli_error($conexion) . "</div>";
+    }
 }
-
-if ($action === 'delete' && $id) {
-    try { $pdo->prepare("DELETE FROM carritos WHERE idcarritos=?")->execute([$id]); setFlash('success','Carrito eliminado.'); }
-    catch (PDOException $e) { setFlash('error','No se puede eliminar: '.$e->getMessage()); }
-    redirect('carritos.php');
-}
-
-$edit = null;
-if ($action === 'edit' && $id) {
-    $s = $pdo->prepare("SELECT * FROM carritos WHERE idcarritos=?"); $s->execute([$id]); $edit = $s->fetch();
-}
-
-$search = sanitize($_GET['search'] ?? '');
-$filtroAsistencia = sanitize($_GET['asistencia'] ?? '');
-$page = max(1,(int)($_GET['page'] ?? 1)); $perPage = 15;
-$conditions = []; $params = [];
-if ($search) { $conditions[] = "(nombre_responsable LIKE :s OR nombre_carrito LIKE :s)"; $params[':s'] = "%$search%"; }
-if ($filtroAsistencia) { $conditions[] = "asistencia=:asistencia"; $params[':asistencia'] = $filtroAsistencia; }
-$where = $conditions ? "WHERE ".implode(' AND ',$conditions) : '';
-$tc = $pdo->prepare("SELECT COUNT(*) FROM carritos $where"); $tc->execute($params); $total = (int)$tc->fetchColumn();
-$pag = getPaginationData($total,$page,$perPage);
-$stmt = $pdo->prepare("SELECT * FROM carritos $where ORDER BY fecha_registro DESC, idcarritos DESC LIMIT :limit OFFSET :offset");
-foreach ($params as $k=>$v) $stmt->bindValue($k,$v);
-$stmt->bindValue(':limit',$pag['perPage'],PDO::PARAM_INT);
-$stmt->bindValue(':offset',$pag['offset'],PDO::PARAM_INT);
-$stmt->execute(); $rows = $stmt->fetchAll();
-
-include 'includes/header.php';
 ?>
 
-<?php if ($action === 'edit' || $action === 'create'): ?>
-<div class="card mb-4">
-    <div class="card-header bg-white border-0 fw-semibold"><?= $edit ? 'Editar Carrito' : 'Nuevo Carrito' ?></div>
-    <div class="card-body">
-    <form method="POST">
-        <input type="hidden" name="id" value="<?= $edit['idcarritos'] ?? '' ?>">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Nombre Responsable *</label>
-                <input type="text" name="nombre_responsable" class="form-control form-control-sm" value="<?= $edit['nombre_responsable'] ?? '' ?>" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Teléfono Responsable</label>
-                <input type="text" name="telefono_responsable" class="form-control form-control-sm" value="<?= $edit['telefono_responsable'] ?? '' ?>">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Nombre del Carrito *</label>
-                <input type="text" name="nombre_carrito" class="form-control form-control-sm" value="<?= $edit['nombre_carrito'] ?? '' ?>" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Asistencia</label>
-                <select name="asistencia" class="form-select form-select-sm">
-                    <?php foreach (['Pendiente','Confirmada','Cancelada'] as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($edit['asistencia'] ?? 'Pendiente') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Hora Salida</label>
-                <input type="time" name="hora_salida" class="form-control form-control-sm" value="<?= $edit['hora_salida'] ?? '' ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Fecha Registro</label>
-                <input type="date" name="fecha_registro" class="form-control form-control-sm" value="<?= $edit['fecha_registro'] ?? date('Y-m-d') ?>">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <div class="form-check">
-                    <input type="checkbox" name="estado" class="form-check-input" id="estado" <?= ($edit['estado'] ?? 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="estado">Activo</label>
-                </div>
-            </div>
-            <div class="col-md-5">
-                <label class="form-label">Descripción</label>
-                <textarea name="descripcion" class="form-control form-control-sm" rows="2"><?= $edit['descripcion'] ?? '' ?></textarea>
-            </div>
-            <div class="col-md-5">
-                <label class="form-label">Equipamiento</label>
-                <textarea name="equipamiento" class="form-control form-control-sm" rows="2"><?= $edit['equipamiento'] ?? '' ?></textarea>
-            </div>
-        </div>
-        <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
-            <a href="carritos.php" class="btn btn-secondary btn-sm">Cancelar</a>
-        </div>
-    </form>
-    </div>
-</div>
-<?php endif; ?>
-
-<div class="card">
-    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-        <span class="fw-semibold">Carritos / Puestos <span class="badge bg-secondary"><?= $total ?></span></span>
-        <div class="d-flex gap-2 flex-wrap">
-            <div class="local-search-block">
-<form class="d-flex gap-2" method="GET">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar..." value="<?= $search ?>">
-                <select name="asistencia" class="form-select form-select-sm" style="width:130px">
-                    <option value="">Todos</option>
-                    <?php foreach (['Pendiente','Confirmada','Cancelada'] as $opt): ?>
-                    <option value="<?= $opt ?>" <?= $filtroAsistencia===$opt?'selected':'' ?>><?= $opt ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
-            </form>
-</div>
-            <a href="carritos.php?action=create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nuevo</a>
-        </div>
-    
-    <?php include __DIR__ . '/includes/print_button.php'; ?>
-</div>
-    <div class="card-body p-0">
-    <div class="table-responsive">
-    <table class="table table-hover mb-0 dt-export" data-title="Listado de Carritos">
-        <thead><tr><th>ID</th><th>Nombre Carrito</th><th>Responsable</th><th>Teléfono</th><th>Asistencia</th><th>Hora Salida</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody>
-        <?php foreach ($rows as $r): ?>
-        <tr>
-            <td><?= $r['idcarritos'] ?></td>
-            <td><?= sanitize($r['nombre_carrito']) ?></td>
-            <td><?= sanitize($r['nombre_responsable']) ?></td>
-            <td><?= $r['telefono_responsable'] ?: '-' ?></td>
-            <td><?= badgeEstado($r['asistencia']) ?></td>
-            <td><?= $r['hora_salida'] ? substr($r['hora_salida'],0,5) : '-' ?></td>
-            <td><?= formatDate($r['fecha_registro']) ?></td>
-            <td><?= badgeEstado((string)$r['estado']) ?></td>
-            <td>
-                <a href="carritos.php?action=edit&id=<?= $r['idcarritos'] ?>" class="btn btn-sm btn-outline-primary btn-action"><i class="bi bi-pencil"></i></a>
-                <a href="carritos.php?action=delete&id=<?= $r['idcarritos'] ?>" class="btn btn-sm btn-outline-danger btn-action btn-delete"><i class="bi bi-trash"></i></a>
-            </td>
-        </tr>
-        <?php endforeach; ?>
+<!DOCTYPE html>
+<html lang="es" data-theme="<?php echo $cfg['tema_color']; ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Carritos | <?php echo $cfg['nombre_sistema']; ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --primary: #55b83e; --border: #e2e8f0; }
+        [data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --primary: #2ecc71; --border: #334155; }
         
-        </tbody>
-    </table>
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .box { background: var(--card); padding: 30px; border-radius: 20px; max-width: 650px; margin: auto; border: 1px solid var(--border); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
+        
+        h2 { text-align: center; margin-bottom: 25px; color: var(--text); }
+        label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); }
+        
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 1rem; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 15px; }
+
+        /* Contenedor de Asistencia */
+        .asistencia-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .asistencia-btn { flex: 1; border: 2px solid var(--border); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; font-weight: 700; transition: 0.3s; font-size: 0.85rem; }
+        .asistencia-btn input { display: none; }
+        
+        /* Colores dinámicos para los botones de opción */
+        .asistencia-btn:has(input[value="SÍ VINO"]:checked) { background: #55b83e; color: white; border-color: #55b83e; }
+        .asistencia-btn:has(input[value="TAL VEZ"]:checked) { background: #f39c12; color: white; border-color: #f39c12; }
+        .asistencia-btn:has(input[value="NO VINO"]:checked) { background: #e74c3c; color: white; border-color: #e74c3c; }
+
+        .btn-save { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 10px; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .alert { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: 600; }
+        .success { background: rgba(34, 197, 94, 0.1); color: #55b83e; border: 1px solid #55b83e; }
+        .error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+        
+        .footer-links { display: flex; justify-content: space-between; margin-top: 25px; }
+        .footer-links a { text-decoration: none; color: var(--text); font-weight: 600; opacity: 0.6; font-size: 0.9rem; }
+        .footer-links a:hover { opacity: 1; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2><i class="fas fa-clipboard-list"></i> Registro de Carritos</h2>
+    
+    <?php echo $mensaje; ?>
+
+    <form method="POST">
+        <div class="grid-3">
+            <div>
+                <label><i class="fas fa-calendar-alt"></i> Fecha:</label>
+                <input type="date" name="fecha_reg" value="<?php echo date('Y-m-d'); ?>" required>
+            </div>
+            <div>
+                <label><i class="fas fa-clock"></i> Ingreso:</label>
+                <input type="time" name="hora_ingreso" value="<?php echo date('H:i'); ?>" required>
+            </div>
+            <div>
+                <label><i class="fas fa-sign-out-alt"></i> Salida:</label>
+                <input type="time" name="hora_salida" value="<?php echo date('H:i', strtotime('+4 hours')); ?>">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <label><i class="fas fa-user"></i> Responsable:</label>
+                <input type="text" name="nombre_persona" placeholder="Nombre completo" required>
+            </div>
+            <div>
+                <label><i class="fas fa-phone"></i> Teléfono:</label>
+                <input type="tel" name="telefono" placeholder="Ej: 91234567890">
+            </div>
+        </div>
+
+        <label><i class="fas fa-question-circle"></i> Estado de Asistencia:</label>
+        <div class="asistencia-container">
+            <label class="asistencia-btn">
+                <input type="radio" name="asistencia" value="SÍ VINO" checked>SÍ VINO
+            </label>
+            <label class="asistencia-btn">
+                <input type="radio" name="asistencia" value="TAL VEZ">TAL VEZ
+            </label>
+            <label class="asistencia-btn">
+                <input type="radio" name="asistencia" value="NO VINO">NO VINO
+            </label>
+        </div>
+
+        <label><i class="fas fa-store"></i> Identificación del Carrito:</label>
+        <input type="text" name="nombre_c" placeholder="Ej: Carrito de fomento" required>
+
+        <div class="grid-2">
+            <div>
+                <label>Estado Estético:</label>
+                <textarea name="desc" rows="3" placeholder="Rayones, limpieza, etc."></textarea>
+            </div>
+            <div>
+                <label>Equipamiento:</label>
+                <textarea name="equip" rows="3" placeholder="Stock inicial..."></textarea>
+            </div>
+        </div>
+
+        <button type="submit" name="save_car" class="btn-save">
+            <i class="fas fa-save"></i> Guardar Registro
+        </button>
+    </form>
+
+    <div class="footer-links">
+        <a href="index.php"><i class="fas fa-arrow-left"></i> Volver al Inicio</a>
+        <a href="lista_carritos.php">Ver Historial <i class="fas fa-history"></i></a>
     </div>
-    </div>
-    <?php if ($pag['totalPages'] > 1): ?>
-    <div class="card-footer bg-white border-0"><?= renderPagination($pag,'carritos.php?search='.urlencode($search).'&asistencia='.urlencode($filtroAsistencia)) ?></div>
-    <?php endif; ?>
 </div>
-<?php include 'includes/footer.php'; ?>
+
+</body>
+</html>
